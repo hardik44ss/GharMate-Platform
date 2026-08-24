@@ -44,7 +44,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
       animate={{ y: 0 }}
       transition={{ type: 'spring', damping: 20, stiffness: 200 }}
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        scrolled ? 'glass-nav py-2.5' : 'bg-transparent py-4'
+        scrolled ? 'glass-nav py-2.5' : 'glass-nav py-3'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,7 +53,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
             <div className="p-2 bg-brand-700 rounded-xl group-hover:bg-brand-800 transition-colors">
               <Hammer className="w-5 h-5 text-white" />
             </div>
-            <span className={`text-xl font-bold font-display ${scrolled ? 'text-slate-900' : 'text-white'}`}>
+            <span className="text-xl font-bold font-display text-slate-900">
               GharMate
             </span>
           </Link>
@@ -63,9 +63,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
               <a
                 key={link.label}
                 href={link.href}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  scrolled ? 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' : 'text-white/80 hover:text-white hover:bg-white/10'
-                }`}
+                className="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               >
                 {link.label}
               </a>
@@ -81,9 +79,9 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
                     scrolled ? 'hover:bg-slate-100' : 'hover:bg-white/10'
                   }`}
                 >
-                  <img src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.fullName}&background=1d3052&color=fff`} alt={user.fullName} className="w-8 h-8 rounded-full object-cover" />
-                  <span className={`text-sm font-semibold ${scrolled ? 'text-slate-700' : 'text-white'}`}>{user.fullName.split(' ')[0]}</span>
-                  <ChevronDown className={`w-4 h-4 ${scrolled ? 'text-slate-400' : 'text-white/60'}`} />
+                  <img src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.fullName}&background=292620&color=fff`} alt={user.fullName} className="w-8 h-8 rounded-full object-cover" />
+                  <span className="text-sm font-semibold text-slate-700">{user.fullName.split(' ')[0]}</span>
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
                 </button>
                 {userMenu && (
                   <>
@@ -109,7 +107,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
               </div>
             ) : (
               <>
-                <button onClick={onAuthClick} className={`text-sm font-semibold ${scrolled ? 'text-slate-700 hover:text-slate-900' : 'text-white hover:text-white/90'}`}>
+                <button onClick={onAuthClick} className="text-sm font-semibold text-slate-700 hover:text-slate-900">
                   Sign In
                 </button>
                 <Button size="sm" onClick={onAuthClick} className={!scrolled ? 'bg-white text-brand-800 hover:bg-white/90' : ''}>
@@ -119,7 +117,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
             )}
           </div>
 
-          <button onClick={() => setMobileOpen(!mobileOpen)} className={`md:hidden p-2 ${scrolled ? 'text-slate-700' : 'text-white'}`}>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-slate-700">
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>

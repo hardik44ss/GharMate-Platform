@@ -20,6 +20,16 @@ export default function LandingPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
+  const formatContractorPricing = (specialization: string, rate: number) => {
+    if (['New Home Construction', 'Civil Construction', 'Structural Work'].includes(specialization)) {
+      return `Starting from ₹${rate.toLocaleString('en-IN')}/sq. ft.`;
+    }
+    if (['Interior Design', 'Modular Kitchen', 'Flooring', 'False Ceiling'].includes(specialization)) {
+      return `Starting from ₹${rate.toLocaleString('en-IN')}/sq. ft.`;
+    }
+    return `Labour from ₹${rate.toLocaleString('en-IN')}/day`;
+  };
+
   const handleSearch = () => {
     navigate(`/contractors${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`);
   };
@@ -30,40 +40,37 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative gradient-hero pt-32 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-accent-400 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-20 w-96 h-96 bg-brand-400 rounded-full blur-3xl" />
-        </div>
+        <div className="absolute inset-x-0 top-0 h-px gold-rule" />
 
         <div className="relative max-w-5xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-6"
+            className="inline-flex items-center gap-2 px-4 py-1.5 bg-white rounded-full border border-brand-200 shadow-soft mb-7"
           >
-            <Sparkles className="w-4 h-4 text-accent-300" />
-            <span className="text-sm font-medium text-white/90">AI-Powered Project Cost Estimation</span>
+            <Sparkles className="w-4 h-4 text-accent-500" />
+            <span className="text-sm font-medium text-brand-700">AI-Driven GharMate Platform for Smart Construction Management</span>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white font-display leading-tight"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-950 font-display leading-tight"
           >
-            Find trusted contractors.
+            Build Smarter.
             <br />
-            <span className="text-accent-400">Build with confidence.</span>
+            <span className="italic text-accent-600">Manage Better.</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-6 text-lg text-white/70 max-w-2xl mx-auto"
+            className="mt-6 text-lg text-brand-600 max-w-2xl mx-auto leading-relaxed"
           >
-            Connect with verified home improvement professionals. Get AI-powered cost estimates, track project milestones, and manage everything in one place.
+            Connect with verified contractors, estimate construction costs with AI, track labour and project milestones, and manage your entire construction project in one place.
           </motion.p>
 
           {/* Search Bar */}
@@ -73,29 +80,29 @@ export default function LandingPage() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mt-10 max-w-2xl mx-auto"
           >
-            <div className="flex items-center gap-2 p-2 bg-white rounded-2xl shadow-float">
+            <div className="flex items-center gap-2 p-2 bg-white rounded-2xl border border-brand-200 shadow-float">
               <div className="flex items-center gap-2 flex-1 px-3">
-                <Search className="w-5 h-5 text-slate-400 shrink-0" />
+                <Search className="w-5 h-5 text-brand-400 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  placeholder="What project do you need help with?"
-                  className="w-full py-3 text-sm text-slate-700 placeholder-slate-400 outline-none bg-transparent"
+                  placeholder="What are you planning to build?"
+                  className="w-full py-3 text-sm text-brand-800 placeholder-brand-400 outline-none bg-transparent"
                 />
               </div>
               <Button size="lg" onClick={handleSearch} className="shrink-0">
-                Search <ArrowRight className="w-4 h-4" />
+                Find Contractors <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-              <span className="text-xs text-white/50">Popular:</span>
-              {['Kitchen Remodel', 'Roofing', 'Bathroom', 'Electrical'].map((tag) => (
+              <span className="text-xs text-brand-400">Popular:</span>
+              {['New Home Construction', 'Home Renovation', 'Interior Design', 'Kitchen Renovation', 'Bathroom Renovation', 'Painting', 'Electrical Work', 'Plumbing', 'Flooring', 'Civil Work'].map((tag) => (
                 <button
                   key={tag}
                   onClick={() => { setSearchQuery(tag); navigate(`/contractors?q=${encodeURIComponent(tag)}`); }}
-                  className="text-xs px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 rounded-full border border-white/10 transition-colors"
+                  className="text-xs px-3 py-1 bg-white hover:bg-brand-100 text-brand-700 rounded-full border border-brand-200 transition-colors"
                 >
                   {tag}
                 </button>
@@ -109,10 +116,10 @@ export default function LandingPage() {
       <section className="bg-white border-y border-slate-100 py-8 px-4">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { icon: Users, value: '4,800+', label: 'Active Users' },
+            { icon: Users, value: '4,800+', label: 'Homeowners' },
             { icon: ShieldCheck, value: '890+', label: 'Verified Contractors' },
             { icon: FileCheck, value: '340+', label: 'Active Projects' },
-            { icon: Star, value: '4.8★', label: 'Avg Rating' },
+            { icon: Star, value: '4.8★', label: 'Average Rating' },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -139,14 +146,14 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 font-display">How GharMate Works</h2>
-            <p className="mt-3 text-slate-500 max-w-xl mx-auto">From idea to completion in four simple steps.</p>
+            <p className="mt-3 text-slate-500 max-w-xl mx-auto">From planning to execution in four focused steps.</p>
           </div>
           <div className="grid md:grid-cols-4 gap-6">
             {[
-              { icon: Search, step: '01', title: 'Search & Discover', desc: 'Browse verified contractors by location, specialty, and rating.' },
-              { icon: Calculator, step: '02', title: 'Estimate with AI', desc: 'Get instant cost estimates and timeline projections for your project.' },
-              { icon: FileCheck, step: '03', title: 'Book & Track', desc: 'Request a booking, agree on milestones, and track progress in real time.' },
-              { icon: Star, step: '04', title: 'Review & Refer', desc: 'Rate your experience and help others find great contractors.' },
+              { icon: Search, step: '01', title: 'Plan Your Project', desc: 'Tell GharMate what you want to build or renovate, including location, property type, area and requirements.' },
+              { icon: Calculator, step: '02', title: 'Estimate with AI', desc: 'Get an AI-assisted construction cost estimate based on project details, location, materials and labour requirements.' },
+              { icon: ShieldCheck, step: '03', title: 'Find & Hire', desc: 'Discover verified contractors based on expertise, location, budget, ratings and project requirements.' },
+              { icon: FileCheck, step: '04', title: 'Build & Track', desc: 'Track milestones, labour, budget, payments and project progress from one dashboard.' },
             ].map((item, i) => (
               <motion.div
                 key={item.step}
@@ -179,8 +186,8 @@ export default function LandingPage() {
               <Sparkles className="w-4 h-4 text-accent-600" />
               <span className="text-xs font-semibold text-accent-700">AI-Powered</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 font-display">Smart Tools for Smarter Projects</h2>
-            <p className="mt-3 text-slate-500 max-w-xl mx-auto">Let AI help you plan, budget, and find the perfect contractor.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 font-display">AI-Powered Construction Tools</h2>
+            <p className="mt-3 text-slate-500 max-w-xl mx-auto">Plan your construction project with intelligent estimates and contractor recommendations.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
@@ -191,15 +198,15 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-xl font-bold text-slate-900">AI Cost Estimator</h3>
                 </div>
-                <p className="text-slate-600 mb-6">Get instant, data-driven cost estimates with detailed breakdowns and timeline projections for any home improvement project.</p>
+                <p className="text-slate-600 mb-6">Get an AI-assisted estimate for your construction or renovation project with estimated material, labour, professional and miscellaneous costs.</p>
                 <div className="space-y-2 mb-6">
-                  {['Material, labor, and permit breakdown', 'Location-adjusted pricing', 'Timeline estimates'].map((f) => (
+                  {['Location-adjusted pricing by city', 'Built-up area and material quality based estimate', 'Labour cost, duration, cost breakdown and budget range'].map((f) => (
                     <div key={f} className="flex items-center gap-2 text-sm text-slate-600">
                       <div className="w-1.5 h-1.5 bg-brand-500 rounded-full" /> {f}
                     </div>
                   ))}
                 </div>
-                <Button variant="outline" onClick={() => setAuthOpen(true)}>Try Cost Estimator <ArrowRight className="w-4 h-4" /></Button>
+                <Button variant="outline" onClick={() => setAuthOpen(true)}>Estimate My Project <ArrowRight className="w-4 h-4" /></Button>
               </Card>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
@@ -210,15 +217,15 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-xl font-bold text-slate-900">AI Contractor Recommender</h3>
                 </div>
-                <p className="text-slate-600 mb-6">Our matching algorithm finds the best contractors for your specific project, budget, and timeline.</p>
+                <p className="text-slate-600 mb-6">Find contractors matched to your project requirements, location, budget and preferred timeline.</p>
                 <div className="space-y-2 mb-6">
-                  {['Match score based on specialty & location', 'Budget-aware recommendations', 'Verified contractors only'].map((f) => (
+                  {['Specialty and location match', 'Budget compatibility and availability', 'Experience, ratings and KYC verification'].map((f) => (
                     <div key={f} className="flex items-center gap-2 text-sm text-slate-600">
                       <div className="w-1.5 h-1.5 bg-accent-500 rounded-full" /> {f}
                     </div>
                   ))}
                 </div>
-                <Button variant="outline" onClick={() => setAuthOpen(true)}>Find My Match <ArrowRight className="w-4 h-4" /></Button>
+                <Button variant="outline" onClick={() => setAuthOpen(true)}>Find My Contractor <ArrowRight className="w-4 h-4" /></Button>
               </Card>
             </motion.div>
           </div>
@@ -231,7 +238,7 @@ export default function LandingPage() {
           <div className="flex items-end justify-between mb-10">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 font-display">Top-Rated Contractors</h2>
-              <p className="mt-2 text-slate-500">Verified professionals ready to take on your project.</p>
+              <p className="mt-2 text-slate-500">Verified professionals for construction, renovation, interiors, and civil work.</p>
             </div>
             <Button variant="outline" size="sm" onClick={() => navigate('/contractors')} className="hidden sm:flex">
               View All <ArrowRight className="w-4 h-4" />
@@ -281,7 +288,7 @@ export default function LandingPage() {
                       ))}
                     </div>
                     <div className="mt-auto pt-4 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-slate-700">${c.hourlyRate}/hr</span>
+                      <span className="text-sm font-semibold text-slate-700">{formatContractorPricing(c.specializations[0], c.hourlyRate)}</span>
                       <Button size="sm" variant="ghost" onClick={() => navigate('/contractors')}>View Profile</Button>
                     </div>
                   </div>
@@ -300,9 +307,9 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { name: 'Amanda R.', text: 'The AI cost estimator was spot on. Saved me from overpaying and the contractor was excellent.', role: 'Kitchen Renovation' },
-              { name: 'Brian L.', text: 'Being able to track milestones and upload documents in one place made the whole project stress-free.', role: 'Bathroom Remodel' },
-              { name: 'Nina P.', text: 'Found our landscaper through GharMate. The verification process gave us real peace of mind.', role: 'Backyard Design' },
+              { name: 'Rahul Sharma', text: 'I could compare contractors, understand the estimated budget and track my construction progress from one place.', role: 'Home Construction' },
+              { name: 'Priya Gupta', text: 'The project milestones and budget tracking made it much easier to understand where our renovation was actually going.', role: 'Home Renovation' },
+              { name: 'Amit Verma', text: 'The contractor verification and AI-assisted estimate helped us shortlist professionals with much more confidence.', role: 'New Home Construction' },
             ].map((t, i) => (
               <motion.div
                 key={t.name}
@@ -331,14 +338,14 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 gradient-brand">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white font-display">Ready to start your project?</h2>
-          <p className="mt-3 text-white/70 max-w-xl mx-auto">Join thousands of homeowners who trust GharMate to connect them with the right professionals.</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white font-display">Ready to build your next project?</h2>
+          <p className="mt-3 text-white/70 max-w-xl mx-auto">Plan your construction, find verified professionals and track your project with GharMate.</p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button size="lg" onClick={() => setAuthOpen(true)} className="bg-white text-brand-800 hover:bg-white/90">
-              Get Started Free <ArrowRight className="w-5 h-5" />
+              Start Your Project <ArrowRight className="w-5 h-5" />
             </Button>
             <Button size="lg" variant="ghost" onClick={() => navigate('/contractors')} className="text-white border-white/30 hover:bg-white/10">
-              Browse Contractors
+              Explore Contractors
             </Button>
           </div>
         </div>
@@ -351,8 +358,8 @@ export default function LandingPage() {
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-xs font-semibold mb-4">
               <Mail className="w-3.5 h-3.5" /> Stay in the loop
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 font-display">Get project tips and contractor insights</h2>
-            <p className="mt-3 text-slate-500 max-w-xl mx-auto">Join our newsletter for monthly guides on home improvement, hiring tips, and platform updates. No spam, ever.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 font-display">Get project tips and construction insights</h2>
+            <p className="mt-3 text-slate-500 max-w-xl mx-auto">Join our newsletter for practical guides on construction planning, contractor hiring, and project tracking updates.</p>
           </div>
 
           <div className="max-w-md mx-auto">
@@ -370,9 +377,9 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-3 gap-6 mt-16 pt-12 border-t border-slate-200">
             {[
-              { icon: Lock, title: 'Bank-Level Security', desc: 'Your data is encrypted and never shared with third parties.' },
-              { icon: ShieldCheck, title: 'Verified Pros Only', desc: 'Every contractor passes KYC verification before joining.' },
-              { icon: Zap, title: 'AI-Powered Matching', desc: 'Smart recommendations based on your project needs and budget.' },
+              { icon: Lock, title: 'Secure Platform Design', desc: 'Role-based access and protected application flows for clients, contractors, and admins.' },
+              { icon: ShieldCheck, title: 'Verified Professionals', desc: 'KYC information and verification status are displayed for contractors on the platform.' },
+              { icon: Zap, title: 'Project Transparency', desc: 'Budgets, milestones, labour updates and project details are organized in one place.' },
             ].map((item) => (
               <div key={item.title} className="text-center">
                 <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mx-auto mb-3">
@@ -385,7 +392,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-12 text-slate-400">
-            {['SOC 2 Compliant', '256-bit Encryption', 'GDPR Ready', '99.9% Uptime'].map((badge) => (
+            {['Verified contractor profiles', 'AI-assisted project planning', 'Milestone and budget visibility', 'Transparent estimate breakdowns'].map((badge) => (
               <span key={badge} className="inline-flex items-center gap-1.5 text-sm font-medium">
                 <CheckCircle className="w-4 h-4 text-green-500" /> {badge}
               </span>
@@ -405,11 +412,12 @@ export default function LandingPage() {
                 </div>
                 <span className="text-lg font-bold text-white font-display">GharMate</span>
               </div>
-              <p className="text-sm">Connecting homeowners with trusted contractors. Powered by AI.</p>
+              <p className="text-sm">An AI-driven construction and contractor management platform helping homeowners plan, build and manage projects with greater confidence.</p>
             </div>
             {[
-              { title: 'For Homeowners', links: ['Find Contractors', 'AI Cost Estimator', 'How It Works', 'Reviews'] },
-              { title: 'For Contractors', links: ['Get Verified', 'Find Projects', 'Pricing', 'Resources'] },
+              { title: 'For Homeowners', links: ['Find Contractors', 'AI Cost Estimator', 'Project Tracking', 'How It Works', 'Reviews'] },
+              { title: 'For Contractors', links: ['Get Verified', 'Manage Projects', 'Manage Labour', 'Find Projects', 'Contractor Dashboard'] },
+              { title: 'Platform', links: ['AI Recommendations', 'Construction Estimates', 'Milestone Tracking', 'KYC & Verification'] },
               { title: 'Company', links: ['About', 'Contact', 'Privacy', 'Terms'] },
             ].map((col) => (
               <div key={col.title}>

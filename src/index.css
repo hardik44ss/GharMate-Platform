@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -10,7 +10,7 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    @apply bg-brand-50 text-brand-900 font-sans antialiased;
   }
   h1, h2, h3, h4, h5 {
     @apply font-display tracking-tight;
@@ -19,30 +19,33 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-glass;
+    @apply bg-white border border-brand-200/60 shadow-soft;
   }
   .glass-nav {
-    @apply bg-white/75 backdrop-blur-lg border border-white/50 shadow-float;
+    @apply bg-brand-50/85 backdrop-blur-md border-b border-brand-200/70;
   }
   .gradient-brand {
-    background: linear-gradient(135deg, #1d3052 0%, #2c5396 50%, #3c6ab5 100%);
+    background: linear-gradient(135deg, #292620 0%, #4d4739 60%, #615948 100%);
   }
   .gradient-hero {
-    background: radial-gradient(ellipse at top, #2c5396 0%, #1d3052 45%, #0f1d33 100%);
+    background:
+      radial-gradient(ellipse 55% 45% at 50% -5%, rgba(197, 160, 92, 0.14) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 35% at 85% 20%, rgba(77, 71, 57, 0.05) 0%, transparent 60%),
+      #faf9f7;
   }
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-accent-500;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-900 via-brand-700 to-accent-600;
   }
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: #c8c2b5 transparent;
   }
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 rounded-full;
+    @apply bg-brand-300 rounded-full;
   }
 }
 
@@ -58,4 +61,27 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ─── Classic Editorial Theme (Contractor Profile) ─────────────── */
+.dark-page {
+  background-color: #faf9f7;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 0%, rgba(197, 160, 92, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 8%, rgba(77, 71, 57, 0.04) 0%, transparent 55%);
+}
+.dark-panel {
+  @apply bg-white border border-brand-200/70 rounded-2xl shadow-soft;
+}
+.dark-panel-hover {
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dark-panel-hover:hover {
+  @apply border-accent-400/60;
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px -16px rgba(41, 38, 32, 0.18);
+}
+.gold-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(171, 136, 68, 0.55), transparent);
 }
