@@ -9,7 +9,7 @@ interface AuthContextValue {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<AuthUser>;
   loginAsRole: (role: UserRole) => Promise<AuthUser>;
-  signup: (data: { email: string; fullName: string; role: UserRole }) => Promise<AuthUser>;
+  signup: (data: { email: string; fullName: string; role: UserRole; password: string }) => Promise<AuthUser>;
   logout: () => void;
 }
 
@@ -41,9 +41,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const u = await apiService.login(email, password);
-    persistAuth('mock-jwt-token-' + u.id, u);
-    return u;
+    const { token, user } = await apiService.login(email, password);
+    persistAuth(token, user);
+    return user;
   };
 
   const loginAsRole = async (role: UserRole) => {
@@ -52,10 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return u;
   };
 
-  const signup = async (data: { email: string; fullName: string; role: UserRole }) => {
-    const u = await apiService.signup(data);
-    persistAuth('mock-jwt-token-' + u.id, u);
-    return u;
+  const signup = async (data: { email: string; fullName: string; role: UserRole; password: string }) => {
+    const { token, user } = await apiService.signup(data);
+    persistAuth(token, user);
+    return user;
   };
 
   const logout = () => {

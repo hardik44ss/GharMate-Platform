@@ -29,12 +29,11 @@ const milestoneColors = {
 
 export default function BookingManager() {
   const { user } = useAuth();
-  const { data: projects } = useQuery({
-    queryKey: ['projects', user?.id],
-    queryFn: apiService.getProjects,
-    initialData: [],
+  const { data: projects = [] } = useQuery({
+    queryKey: ['my-projects', user?.id],
+    queryFn: apiService.getMyProjects,
   });
-  const myProjects = projects.filter((p) => p.clientId === 'u-client-1');
+  const myProjects = projects;
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -67,7 +66,7 @@ export default function BookingManager() {
                 <div className="flex items-center gap-4 text-xs text-slate-500">
                   <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {project.location}</span>
                   <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> Due {new Date(project.estimatedEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                  <span className="flex items-center gap-1"><DollarSign className="w-3.5 h-3.5" /> {project.budget.toLocaleString()}</span>
+                  <span className="flex items-center gap-1"><DollarSign className="w-3.5 h-3.5" /> ₹{project.budget.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
@@ -89,7 +88,7 @@ export default function BookingManager() {
                             <p className="text-xs text-slate-400 mt-1">Due {new Date(m.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
                           </div>
                           <div className="text-right shrink-0">
-                            <p className="text-sm font-semibold text-slate-700">${m.amount.toLocaleString()}</p>
+                            <p className="text-sm font-semibold text-slate-700">₹{m.amount.toLocaleString('en-IN')}</p>
                             {m.completedDate && <p className="text-xs text-green-600">Completed {new Date(m.completedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>}
                           </div>
                         </div>

@@ -15,13 +15,12 @@ import Button from '@/components/ui/Button';
 
 export default function ClientOverview() {
   const { user } = useAuth();
-  const { data: projects, isLoading } = useQuery({
-    queryKey: ['projects', user?.id],
-    queryFn: apiService.getProjects,
-  initialData: [],
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ['my-projects', user?.id],
+    queryFn: apiService.getMyProjects,
   });
 
-  const myProjects = projects.filter((p) => p.clientId === 'u-client-1');
+  const myProjects = projects;
   const activeProjects = myProjects.filter((p) => ['ACCEPTED', 'IN_PROGRESS', 'AWAITING_REVIEW'].includes(p.status));
   const pendingApprovals = myProjects.filter((p) => p.status === 'AWAITING_REVIEW' || p.status === 'REQUESTED');
   const totalBudget = myProjects.reduce((sum, p) => sum + p.budget, 0);
@@ -45,7 +44,7 @@ export default function ClientOverview() {
         <StatCard label="Active Projects" value={activeProjects.length} icon={FolderKanban} accent="brand" />
         <StatCard label="Pending Approvals" value={pendingApprovals.length} icon={Clock} accent="accent" />
         <StatCard label="Completed" value={completedProjects.length} icon={CheckCircle2} accent="green" />
-        <StatCard label="Total Invested" value={`$${(totalBudget / 1000).toFixed(0)}k`} icon={DollarSign} accent="slate" />
+        <StatCard label="Total Invested" value={`₹${(totalBudget / 100000).toFixed(1)} lakh`} icon={DollarSign} accent="slate" />
       </div>
 
       {/* AI Tools Quick Access */}
@@ -98,7 +97,7 @@ export default function ClientOverview() {
                     </div>
                     <p className="text-sm text-slate-500 truncate">{p.contractorName} · {p.category} · {p.location}</p>
                     <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
-                      <span>Budget: <strong className="text-slate-700">${p.budget.toLocaleString()}</strong></span>
+                      <span>Budget: <strong className="text-slate-700">₹{p.budget.toLocaleString('en-IN')}</strong></span>
                       <span>Due: <strong className="text-slate-700">{new Date(p.estimatedEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</strong></span>
                       <span>{p.milestones.filter((m) => m.status === 'COMPLETED').length}/{p.milestones.length} milestones</span>
                     </div>

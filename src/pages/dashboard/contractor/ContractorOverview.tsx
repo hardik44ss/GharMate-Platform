@@ -12,10 +12,9 @@ import Button from '@/components/ui/Button';
 
 export default function ContractorOverview() {
   const { user } = useAuth();
-  const { data: projects } = useQuery({
+  const { data: projects = [] } = useQuery({
     queryKey: ['projects', user?.id],
     queryFn: apiService.getProjects,
-    initialData: [],
   });
 
   const myProjects = projects.filter((p) => p.contractorId === 'c1');
@@ -54,11 +53,13 @@ export default function ContractorOverview() {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <StatCard label="Active Projects" value={activeProjects.length} icon={FolderKanban} accent="brand" />
-        <StatCard label="Pending Requests" value={pendingRequests.length} icon={Clock} accent="accent" />
-        <StatCard label="Completed" value={completed.length} icon={CheckCircle2} accent="green" />
-        <StatCard label="Total Earnings" value={`$${(totalEarnings / 1000).toFixed(0)}k`} icon={DollarSign} accent="slate" />
+        <StatCard label="Pending Bookings" value={pendingRequests.length} icon={Clock} accent="accent" />
+        <StatCard label="Today’s Workforce" value="8 Workers" icon={CheckCircle2} accent="green" />
+        <StatCard label="Total Earnings" value={`₹${(totalEarnings / 100000).toFixed(1)} lakh`} icon={DollarSign} accent="slate" />
+        <StatCard label="Pending Payments" value="₹3.4L" icon={TrendingUp} accent="brand" />
+        <StatCard label="Average Rating" value="4.8/5" icon={ShieldCheck} accent="green" />
       </div>
 
       <h2 className="text-lg font-bold text-slate-900 mb-4">Recent Project Requests</h2>
@@ -78,7 +79,7 @@ export default function ContractorOverview() {
                     <h3 className="font-bold text-slate-900">{p.title}</h3>
                     <StatusBadge status={p.status} />
                   </div>
-                  <p className="text-sm text-slate-500">{p.clientName} · {p.location} · ${p.budget.toLocaleString()}</p>
+                  <p className="text-sm text-slate-500">{p.clientName} · {p.location} · ₹{p.budget.toLocaleString('en-IN')}</p>
                 </div>
                 <Link to="/dashboard/contractor/projects"><Button size="sm" variant="ghost">Manage <ArrowRight className="w-4 h-4" /></Button></Link>
               </Card>

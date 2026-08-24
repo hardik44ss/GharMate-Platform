@@ -10,10 +10,10 @@ import { allSpecializations, allLocations } from '@/api/mockData';
 import type { CostEstimate } from '@/types';
 
 export default function AICostEstimator() {
-  const [projectType, setProjectType] = useState('Kitchen Remodel');
+  const [projectType, setProjectType] = useState('New Home Construction');
   const [squareFootage, setSquareFootage] = useState(200);
   const [materialQuality, setMaterialQuality] = useState('Standard');
-  const [location, setLocation] = useState('Denver, CO');
+  const [location, setLocation] = useState('Bengaluru, Karnataka');
   const [estimate, setEstimate] = useState<CostEstimate | null>(null);
 
   const { isFetching, refetch } = useQuery({
@@ -27,11 +27,11 @@ export default function AICostEstimator() {
     if (res.data) setEstimate(res.data);
   };
 
-  const formatCurrency = (n: number) => `$${n.toLocaleString()}`;
+  const formatCurrency = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
   return (
     <div>
-      <DashboardHeader title="AI Cost Estimator" subtitle="Get an instant, data-driven estimate for your home improvement project." />
+      <DashboardHeader title="AI-Assisted Cost Estimator" subtitle="Estimate construction and renovation budgets using your area, location, and material quality." />
 
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Form */}
@@ -39,7 +39,7 @@ export default function AICostEstimator() {
           <Card className="p-6 sticky top-6">
             <div className="flex items-center gap-2 mb-5">
               <div className="p-2 bg-brand-50 rounded-lg"><Calculator className="w-5 h-5 text-brand-600" /></div>
-              <h3 className="font-bold text-slate-900">Project Details</h3>
+              <h3 className="font-bold text-slate-900">Project Inputs</h3>
             </div>
 
             <div className="space-y-5">
@@ -51,7 +51,7 @@ export default function AICostEstimator() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Square Footage: <span className="text-brand-600">{squareFootage} sq ft</span></label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Built-up Area: <span className="text-brand-600">{squareFootage} sq ft</span></label>
                 <input type="range" min="50" max="2000" step="10" value={squareFootage} onChange={(e) => setSquareFootage(Number(e.target.value))} className="w-full accent-brand-600" />
                 <div className="flex justify-between text-xs text-slate-400 mt-1"><span>50 sq ft</span><span>2000 sq ft</span></div>
               </div>
@@ -73,7 +73,7 @@ export default function AICostEstimator() {
               </div>
 
               <Button fullWidth size="lg" onClick={handleEstimate} loading={isFetching} className="bg-accent-500 hover:bg-accent-600">
-                <Sparkles className="w-4 h-4" /> Generate Estimate
+                <Sparkles className="w-4 h-4" /> Estimate My Project
               </Button>
             </div>
           </Card>
@@ -87,7 +87,7 @@ export default function AICostEstimator() {
                 <Card className="p-12 text-center">
                   <Loader2 className="w-10 h-10 text-brand-500 animate-spin mx-auto mb-4" />
                   <h3 className="font-semibold text-slate-700">Analyzing project parameters...</h3>
-                  <p className="text-sm text-slate-500 mt-1">Our AI is calculating your estimate based on real market data.</p>
+                  <p className="text-sm text-slate-500 mt-1">GharMate is preparing an AI-assisted estimate based on city rates, area, and quality inputs.</p>
                 </Card>
               </motion.div>
             ) : estimate ? (
@@ -95,13 +95,14 @@ export default function AICostEstimator() {
                 <Card className="p-6 mb-4 bg-gradient-to-br from-brand-50 to-white border-brand-100">
                   <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="w-5 h-5 text-accent-500" />
-                    <h3 className="font-bold text-slate-900">AI Cost Estimate</h3>
+                    <h3 className="font-bold text-slate-900">AI-Assisted Cost Estimate</h3>
                     <span className="ml-auto text-xs px-2 py-1 bg-green-50 text-green-700 rounded-full font-semibold">{estimate.confidence}% confidence</span>
                   </div>
                   <div className="text-center py-4">
-                    <p className="text-sm text-slate-500">Estimated Total Range</p>
+                    <p className="text-sm text-slate-500">Estimated Construction Budget Range</p>
                     <p className="text-3xl font-bold text-slate-900 font-display mt-1">{formatCurrency(estimate.lowRange)} – {formatCurrency(estimate.highRange)}</p>
                     <p className="text-sm text-slate-500 mt-2">Midpoint: <strong className="text-brand-600">{formatCurrency(estimate.midpoint)}</strong></p>
+                    {estimate.recommendedRange && <p className="text-sm text-brand-700 mt-2 font-semibold">{estimate.recommendedRange}</p>}
                   </div>
                   <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-slate-100">
                     <div className="flex items-center gap-1.5 text-sm text-slate-600"><Clock className="w-4 h-4 text-slate-400" /> Timeline: {estimate.timeline}</div>
@@ -127,7 +128,7 @@ export default function AICostEstimator() {
                   <div className="mt-6 p-4 bg-slate-50 rounded-xl">
                     <p className="text-xs text-slate-500 flex items-start gap-2">
                       <TrendingUp className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                      Estimates are based on regional market data, material costs, and labor rates. Final quotes from contractors may vary based on project specifics.
+                      This is an AI-assisted estimate for planning. Actual contractor quotations may vary based on site conditions, scope changes, and material selections.
                     </p>
                   </div>
                   <Button fullWidth className="mt-4" variant="primary">

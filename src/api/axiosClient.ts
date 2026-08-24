@@ -29,13 +29,22 @@ api.interceptors.response.use(
       const status = error.response.status;
 
       if (status === 401 && !isRefreshing) {
-        isRefreshing = true;
-        localStorage.removeItem('bb_token');
-        localStorage.removeItem('bb_user');
-        if (window.location.pathname !== '/' && !window.location.pathname.startsWith('/auth')) {
-          window.location.href = '/';
+        // Don't clear localStorage for auth endpoints (login/register) —
+        // let the UI handle errors (e.g., show toast with invalid credentials)
+        const requestUrl = error.config?.url ?? '';
+        const isAuthEndpoint = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+        // Don't clear localStorage for mock tokens (dev quick-login feature)
+        const isMockToken = (localStorage.getItem('bb_token') ?? '').startsWith('mock-jwt-token-');
+
+        if (!isAuthEndpoint && !isMockToken) {
+          isRefreshing = true;
+          localStorage.removeItem('bb_token');
+          localStorage.removeItem('bb_user');
+          if (window.location.pathname !== '/' && !window.location.pathname.startsWith('/auth')) {
+            window.location.href = '/';
+          }
+          isRefreshing = false;
         }
-        isRefreshing = false;
       }
 
       if (status === 429) {

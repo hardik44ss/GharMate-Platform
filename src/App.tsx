@@ -20,7 +20,14 @@ import UserManagement from '@/pages/dashboard/admin/UserManagement';
 import AuditLogs from '@/pages/dashboard/admin/AuditLogs';
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+      // Fall back to demo data quickly when the backend/DB is unavailable
+      staleTime: 5 * 60 * 1000,
+    },
+  },
 });
 
 export default function App() {

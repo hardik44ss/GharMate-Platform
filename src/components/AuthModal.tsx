@@ -70,7 +70,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
 
   const onSignup = async (data: SignupFormData) => {
     try {
-      const u = await signup({ email: data.email, fullName: data.fullName, role: data.role });
+      const u = await signup({ email: data.email, fullName: data.fullName, role: data.role, password: data.password });
       toast.success(`Account created! Welcome, ${u.fullName.split(' ')[0]}.`);
       onClose();
       navigate(dashMap[u.role]);

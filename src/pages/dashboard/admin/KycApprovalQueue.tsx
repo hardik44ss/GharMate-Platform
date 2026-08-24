@@ -20,7 +20,7 @@ const docTypeLabels: Record<string, string> = {
 
 export default function KycApprovalQueue() {
   const queryClient = useQueryClient();
-  const { data: submissions } = useQuery({ queryKey: ['kyc'], queryFn: apiService.getKycSubmissions, initialData: [] });
+  const { data: submissions = [] } = useQuery({ queryKey: ['kyc'], queryFn: apiService.getKycSubmissions });
   const [selected, setSelected] = useState<KycSubmission | null>(null);
   const [rejectOpen, setRejectOpen] = useState<KycSubmission | null>(null);
   const [rejectReason, setRejectReason] = useState('');

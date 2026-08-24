@@ -130,19 +130,19 @@ export default function KycPortal() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Business Name *</label>
-                <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-brand-400 outline-none" placeholder="Acme Construction LLC" />
+                <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-brand-400 outline-none" placeholder="PrimeBuild Contractors" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">License Number *</label>
-                <input value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-brand-400 outline-none" placeholder="CO-BC-123456" />
+                <input value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-brand-400 outline-none" placeholder="HR-CON-459812" />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Business Address *</label>
-                <input value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-brand-400 outline-none" placeholder="123 Main St, Denver, CO 80202" />
+                <input value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-brand-400 outline-none" placeholder="Sector 14, Gurugram, Haryana 122001" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tax ID / EIN *</label>
-                <input value={taxId} onChange={(e) => setTaxId(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-brand-400 outline-none" placeholder="XX-XXXXXXX" />
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">PAN / GSTIN *</label>
+                <input value={taxId} onChange={(e) => setTaxId(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-brand-400 outline-none" placeholder="27ABCDE1234F1Z9" />
               </div>
             </div>
           </Card>

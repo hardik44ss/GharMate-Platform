@@ -24,10 +24,9 @@ const columns: { status: ProjectStatus; title: string; color: string }[] = [
 export default function ProjectKanban() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { data: projects } = useQuery({
+  const { data: projects = [] } = useQuery({
     queryKey: ['projects', user?.id],
     queryFn: apiService.getProjects,
-    initialData: [],
   });
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -41,9 +40,73 @@ export default function ProjectKanban() {
     setSelectedProject(null);
   };
 
+  const workforce = [
+    { role: 'Masons', count: 3, rate: 900 },
+    { role: 'Helpers', count: 3, rate: 600 },
+    { role: 'Electrician', count: 1, rate: 1000 },
+    { role: 'Plumber', count: 1, rate: 900 },
+  ];
+  const labourCost = workforce.reduce((sum, item) => sum + item.count * item.rate, 0);
+
   return (
     <div>
-      <DashboardHeader title="Project Board" subtitle="Manage incoming requests and track project progress." />
+      <DashboardHeader title="Smart Construction Project Management" subtitle="Track bookings, milestone progress, labour and payments across active projects." />
+
+      <div className="grid md:grid-cols-4 gap-4 mb-6">
+        <Card className="p-4">
+          <p className="text-xs text-slate-500">Project Value</p>
+          <p className="text-2xl font-bold text-slate-900 mt-2">₹12.8L</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-xs text-slate-500">Amount Paid</p>
+          <p className="text-2xl font-bold text-slate-900 mt-2">₹5.2L</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-xs text-slate-500">Remaining</p>
+          <p className="text-2xl font-bold text-slate-900 mt-2">₹7.6L</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-xs text-slate-500">Progress</p>
+          <p className="text-2xl font-bold text-slate-900 mt-2">64%</p>
+        </Card>
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Current milestone</p>
+            <p className="text-lg font-bold text-slate-900 mt-1">Electrical Work</p>
+          </div>
+          <div className="text-left md:text-right">
+            <p className="text-xs text-slate-500">Expected Completion</p>
+            <p className="font-semibold text-slate-700">18 September 2026</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-6 p-4 rounded-2xl border border-slate-200 bg-white">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold text-slate-900">Today’s Workforce</h3>
+          <span className="text-sm font-semibold text-brand-600">8 Workers</span>
+        </div>
+        <div className="grid md:grid-cols-2 gap-3">
+          {workforce.map((member) => (
+            <div key={member.role} className="flex items-center justify-between rounded-xl bg-slate-50 p-3">
+              <div>
+                <p className="font-semibold text-slate-800">{member.role}</p>
+                <p className="text-xs text-slate-500">{member.count} workers</p>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold text-slate-900">₹{member.rate}/day</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
+          <p className="text-sm text-slate-600">Today’s Labour Cost</p>
+          <p className="text-lg font-bold text-slate-900">₹{labourCost.toLocaleString('en-IN')}</p>
+        </div>
+      </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
         {columns.map((col) => {
@@ -69,7 +132,7 @@ export default function ProjectKanban() {
                       <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1"><User className="w-3 h-3" /> {p.clientName}</p>
                       <div className="flex items-center gap-2 mt-2 text-xs text-slate-400">
                         <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" /> {p.location.split(',')[0]}</span>
-                        <span className="flex items-center gap-0.5"><DollarSign className="w-3 h-3" /> {(p.budget / 1000).toFixed(0)}k</span>
+                        <span className="flex items-center gap-0.5"><DollarSign className="w-3 h-3" /> ₹{(p.budget / 100000).toFixed(1)}L</span>
                       </div>
                       {p.progress > 0 && (
                         <div className="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -107,7 +170,7 @@ export default function ProjectKanban() {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div><p className="text-xs text-slate-400">Client</p><p className="font-semibold text-slate-700">{selectedProject.clientName}</p></div>
-                <div><p className="text-xs text-slate-400">Budget</p><p className="font-semibold text-slate-700">${selectedProject.budget.toLocaleString()}</p></div>
+                <div><p className="text-xs text-slate-400">Budget</p><p className="font-semibold text-slate-700">₹{selectedProject.budget.toLocaleString('en-IN')}</p></div>
                 <div><p className="text-xs text-slate-400">Location</p><p className="font-semibold text-slate-700">{selectedProject.location}</p></div>
                 <div><p className="text-xs text-slate-400">Start Date</p><p className="font-semibold text-slate-700">{new Date(selectedProject.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p></div>
               </div>
@@ -118,7 +181,7 @@ export default function ProjectKanban() {
                   {selectedProject.milestones.map((m) => (
                     <div key={m.id} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg text-sm">
                       <span className={m.status === 'COMPLETED' ? 'text-slate-400 line-through' : 'text-slate-700'}>{m.title}</span>
-                      <span className="text-xs text-slate-500">${m.amount.toLocaleString()}</span>
+                      <span className="text-xs text-slate-500">₹{m.amount.toLocaleString('en-IN')}</span>
                     </div>
                   ))}
                 </div>

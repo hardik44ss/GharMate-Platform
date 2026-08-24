@@ -68,6 +68,20 @@ export interface Project {
   progress: number;
 }
 
+export type BidStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+
+export interface Bid {
+  id: string;
+  projectId: string;
+  contractorId: string;
+  amount: number;
+  estimatedDays: number;
+  message?: string;
+  status: BidStatus;
+  project?: { title: string; status: string; location: string; budget: number };
+  createdAt: string;
+}
+
 export interface Review {
   id: string;
   projectId: string;
@@ -131,6 +145,9 @@ export interface CostEstimate {
   breakdown: { category: string; amount: number; percentage: number }[];
   timeline: string;
   confidence: number;
+  summary?: string;
+  recommendedRange?: string;
+  insights?: string[];
 }
 
 export interface ContractorMatch {

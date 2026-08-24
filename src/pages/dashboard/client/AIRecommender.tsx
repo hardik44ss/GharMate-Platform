@@ -15,7 +15,7 @@ export default function AIRecommender() {
   const [projectType, setProjectType] = useState('');
   const [budget, setBudget] = useState(25000);
   const [timeline, setTimeline] = useState('1-3 months');
-  const [location, setLocation] = useState('Denver, CO');
+  const [location, setLocation] = useState('Bengaluru, Karnataka');
   const [matches, setMatches] = useState<ContractorMatch[] | null>(null);
 
   const { isFetching, refetch } = useQuery({
@@ -36,7 +36,7 @@ export default function AIRecommender() {
 
   return (
     <div>
-      <DashboardHeader title="AI Contractor Recommender" subtitle="Answer a few questions and our AI will match you with the best contractors." />
+      <DashboardHeader title="AI-Powered Contractor Recommendation" subtitle="Smart contractor matching for construction and renovation projects in India." />
 
       <div className="max-w-3xl mx-auto">
         {/* Progress */}
@@ -81,9 +81,9 @@ export default function AIRecommender() {
                 <h3 className="text-lg font-bold text-slate-900 mb-2">What is your budget range?</h3>
                 <p className="text-sm text-slate-500 mb-6">This helps us match you with contractors who fit your budget.</p>
                 <div className="text-center py-8">
-                  <p className="text-4xl font-bold text-brand-600 font-display">${budget.toLocaleString()}</p>
-                  <input type="range" min="1000" max="100000" step="1000" value={budget} onChange={(e) => setBudget(Number(e.target.value))} className="w-full mt-6 accent-brand-600" />
-                  <div className="flex justify-between text-xs text-slate-400 mt-1"><span>$1,000</span><span>$100,000+</span></div>
+                  <p className="text-4xl font-bold text-brand-600 font-display">₹{budget.toLocaleString('en-IN')}</p>
+                  <input type="range" min="10000" max="1000000" step="5000" value={budget} onChange={(e) => setBudget(Number(e.target.value))} className="w-full mt-6 accent-brand-600" />
+                  <div className="flex justify-between text-xs text-slate-400 mt-1"><span>₹10,000</span><span>₹10,00,000+</span></div>
                 </div>
                 <div className="flex justify-between mt-6">
                   <Button variant="ghost" onClick={() => setStep(0)}>Back</Button>
@@ -128,8 +128,8 @@ export default function AIRecommender() {
             <motion.div key="s3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="w-5 h-5 text-accent-500" />
-                <h3 className="text-lg font-bold text-slate-900">Your AI Matches</h3>
-                <span className="text-sm text-slate-500">· {matches.length} contractors found</span>
+                <h3 className="text-lg font-bold text-slate-900">Recommended for You</h3>
+                <span className="text-sm text-slate-500">· {matches.length} contractors matched</span>
               </div>
               <div className="space-y-4">
                 {matches.map((m, i) => (
@@ -138,24 +138,28 @@ export default function AIRecommender() {
                       <div className="flex items-start gap-4">
                         <div className="relative shrink-0">
                           <img src={m.contractor.avatarUrl} alt={m.contractor.businessName} className="w-14 h-14 rounded-xl object-cover" />
-                          <div className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-accent-500 text-white text-xs font-bold rounded-full">{m.matchScore}%</div>
+                          <div className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-accent-500 text-white text-xs font-bold rounded-full">{m.matchScore}% Match</div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <h4 className="font-bold text-slate-900 truncate">{m.contractor.businessName}</h4>
                             {m.contractor.verified && <ShieldCheck className="w-4 h-4 text-green-600 shrink-0" />}
                           </div>
+                          <p className="text-xs text-slate-500 mt-1">{m.contractor.specializations[0]} · {m.contractor.location}</p>
                           <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-                            <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {m.contractor.location}</span>
                             <StarRating rating={m.contractor.rating} showValue size={12} />
-                            <span>${m.contractor.hourlyRate}/hr</span>
+                            <span>{m.contractor.yearsActive} years experience</span>
+                            <span>{m.contractor.projectsCompleted} completed projects</span>
                           </div>
-                          <div className="flex flex-wrap gap-1.5 mt-3">
-                            {m.matchReasons.map((r) => (
-                              <span key={r} className="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-md font-medium flex items-center gap-1">
-                                <span className="w-1 h-1 bg-green-500 rounded-full" /> {r}
-                              </span>
-                            ))}
+                          <div className="mt-3">
+                            <p className="text-xs font-semibold text-slate-700 mb-2">Why GharMate recommends him</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {m.matchReasons.map((r) => (
+                                <span key={r} className="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-md font-medium flex items-center gap-1">
+                                  <span className="w-1 h-1 bg-green-500 rounded-full" /> {r}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         </div>
                         <Button size="sm" className="shrink-0">Contact</Button>

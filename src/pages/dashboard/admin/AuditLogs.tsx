@@ -11,7 +11,7 @@ import type { AuditLog } from '@/types';
 const PAGE_SIZE = 8;
 
 export default function AuditLogs() {
-  const { data: logs } = useQuery({ queryKey: ['audit'], queryFn: apiService.getAuditLogs, initialData: [] });
+  const { data: logs = [] } = useQuery({ queryKey: ['audit'], queryFn: apiService.getAuditLogs });
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'SUCCESS' | 'FAILED' | 'WARNING'>('ALL');
   const [page, setPage] = useState(0);

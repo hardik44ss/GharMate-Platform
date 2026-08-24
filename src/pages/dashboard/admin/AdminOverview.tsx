@@ -8,9 +8,9 @@ import Card from '@/components/ui/Card';
 import StatusBadge from '@/components/ui/StatusBadge';
 
 export default function AdminOverview() {
-  const { data: metrics } = useQuery({ queryKey: ['metrics'], queryFn: apiService.getMetrics, initialData: null });
-  const { data: kycSubs } = useQuery({ queryKey: ['kyc'], queryFn: apiService.getKycSubmissions, initialData: [] });
-  const { data: logs } = useQuery({ queryKey: ['audit'], queryFn: apiService.getAuditLogs, initialData: [] });
+  const { data: metrics } = useQuery({ queryKey: ['metrics'], queryFn: apiService.getMetrics });
+  const { data: kycSubs = [] } = useQuery({ queryKey: ['kyc'], queryFn: apiService.getKycSubmissions });
+  const { data: logs = [] } = useQuery({ queryKey: ['audit'], queryFn: apiService.getAuditLogs });
 
   if (!metrics) return null;
   const pendingKycs = kycSubs.filter((k) => k.status === 'PENDING');
@@ -23,7 +23,7 @@ export default function AdminOverview() {
         <StatCard label="Total Users" value={metrics.totalUsers.toLocaleString()} icon={Users} accent="brand" trend={`${metrics.monthlyGrowth}%`} trendUp />
         <StatCard label="Active Projects" value={metrics.activeProjects} icon={FolderKanban} accent="accent" />
         <StatCard label="Pending KYCs" value={metrics.pendingKycs} icon={ShieldCheck} accent="red" />
-        <StatCard label="Total Volume" value={`$${(metrics.totalRevenue / 1e6).toFixed(1)}M`} icon={DollarSign} accent="green" />
+        <StatCard label="Total Volume" value={`₹${(metrics.totalRevenue / 1e5).toFixed(1)}L`} icon={DollarSign} accent="green" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6 mb-8">
@@ -42,7 +42,7 @@ export default function AdminOverview() {
         </Card>
         <Card className="p-5">
           <div className="flex items-center gap-2 mb-3"><DollarSign className="w-5 h-5 text-green-600" /><h3 className="font-bold text-slate-900">Platform Volume</h3></div>
-          <p className="text-3xl font-bold text-slate-900 font-display">${(metrics.totalRevenue / 1e6).toFixed(2)}M</p>
+          <p className="text-3xl font-bold text-slate-900 font-display">₹{(metrics.totalRevenue / 1e5).toFixed(2)}L</p>
           <div className="flex items-center gap-1 mt-3 text-sm text-green-600"><ArrowUpRight className="w-4 h-4" /> +12.4% vs last month</div>
         </Card>
       </div>

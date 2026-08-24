@@ -14,12 +14,11 @@ import type { Project } from '@/types';
 
 export default function ReviewManager() {
   const { user } = useAuth();
-  const { data: projects } = useQuery({
-    queryKey: ['projects', user?.id],
-    queryFn: apiService.getProjects,
-    initialData: [],
+  const { data: projects = [] } = useQuery({
+    queryKey: ['my-projects', user?.id],
+    queryFn: apiService.getMyProjects,
   });
-  const myProjects = projects.filter((p) => p.clientId === 'u-client-1');
+  const myProjects = projects;
   const reviewable = myProjects.filter((p) => p.status === 'COMPLETED' || p.status === 'AWAITING_REVIEW');
   const [reviewOpen, setReviewOpen] = useState<Project | null>(null);
   const [rating, setRating] = useState(5);

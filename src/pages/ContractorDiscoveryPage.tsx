@@ -5,11 +5,13 @@ import {
   Search, SlidersHorizontal, ShieldCheck, Sparkles, MapPin,
   Star, Wrench, X, ChevronDown,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/layout/Navbar';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import StarRating from '@/components/ui/StarRating';
-import { mockContractors, allSpecializations, allLocations } from '@/api/mockData';
+import { apiService } from '@/api/apiService';
+import { allSpecializations, allLocations } from '@/api/mockData';
 
 export default function ContractorDiscoveryPage() {
   const [searchParams] = useSearchParams();
@@ -22,8 +24,16 @@ export default function ContractorDiscoveryPage() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [sortBy, setSortBy] = useState<'rating' | 'reviews' | 'price'>('rating');
 
+  // Load the real contractor directory from the backend (public endpoint).
+  // Falls back to bundled demo contractors when the API is unreachable.
+  const { data: contractors = [], isLoading } = useQuery({
+    queryKey: ['contractors'],
+    queryFn: apiService.getContractors,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const filtered = useMemo(() => {
-    let result = [...mockContractors];
+    let result = [...contractors];
     if (query) {
       const q = query.toLowerCase();
       result = result.filter((c) =>
@@ -67,6 +77,16 @@ export default function ContractorDiscoveryPage() {
 
   const activeFilterCount = selectedSpecs.length + (selectedLocation ? 1 : 0) + (minRating > 0 ? 1 : 0) + (verifiedOnly ? 1 : 0);
 
+  const formatPricing = (specialization: string, rate: number) => {
+    if (['New Home Construction', 'Civil Construction', 'Structural Work'].includes(specialization)) {
+      return `Starting from ₹${rate.toLocaleString('en-IN')}/sq. ft.`;
+    }
+    if (['Interior Design', 'Modular Kitchen', 'Flooring', 'False Ceiling'].includes(specialization)) {
+      return `Starting from ₹${rate.toLocaleString('en-IN')}/sq. ft.`;
+    }
+    return `Labour from ₹${rate.toLocaleString('en-IN')}/day`;
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar onAuthClick={() => navigate('/')} />
@@ -74,8 +94,8 @@ export default function ContractorDiscoveryPage() {
       <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-slate-900 font-display">Find Contractors</h1>
-            <p className="mt-1 text-slate-500">Browse verified professionals for your home improvement project.</p>
+            <h1 className="text-3xl font-bold text-slate-900 font-display">Find Verified Contractors</h1>
+            <p className="mt-1 text-slate-500">Browse construction and renovation professionals matched to your location and project needs.</p>
           </div>
 
           {/* Search + Filter Bar */}
@@ -86,7 +106,7 @@ export default function ContractorDiscoveryPage() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by name, specialty, or location..."
+                placeholder="Search by contractor name, specialization, or city..."
                 className="flex-1 text-sm outline-none bg-transparent"
               />
               {query && (
@@ -114,7 +134,7 @@ export default function ContractorDiscoveryPage() {
                 >
                   <option value="rating">Top Rated</option>
                   <option value="reviews">Most Reviewed</option>
-                  <option value="price">Lowest Price</option>
+                  <option value="price">Best Value</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               </div>
@@ -189,9 +209,16 @@ export default function ContractorDiscoveryPage() {
             </motion.div>
           )}
 
-          <p className="text-sm text-slate-500 mb-4">{filtered.length} contractor{filtered.length !== 1 ? 's' : ''} found</p>
+          <p className="text-sm text-slate-500 mb-4">{isLoading ? 'Loading contractors…' : `${filtered.length} contractor${filtered.length !== 1 ? 's' : ''} found for your project requirements`}</p>
 
           {/* Grid */}
+          {isLoading && filtered.length === 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-72 rounded-2xl bg-slate-100 animate-pulse" />
+              ))}
+            </div>
+          ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((c, i) => (
               <motion.div
@@ -202,7 +229,11 @@ export default function ContractorDiscoveryPage() {
               >
                 <Card hover className="overflow-hidden h-full flex flex-col">
                   <div className="relative h-32 overflow-hidden">
-                    <img src={c.coverUrl} alt={c.businessName} className="w-full h-full object-cover" />
+                    {c.coverUrl ? (
+                      <img src={c.coverUrl} alt={c.businessName} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-brand-600 to-brand-700" />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
                     {c.verified && (
                       <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full">
@@ -219,7 +250,13 @@ export default function ContractorDiscoveryPage() {
                   </div>
                   <div className="p-5 flex-1 flex flex-col">
                     <div className="flex items-start gap-3">
-                      <img src={c.avatarUrl} alt={c.ownerName} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm -mt-8" />
+                      {c.avatarUrl ? (
+                        <img src={c.avatarUrl} alt={c.ownerName} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm -mt-8" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-slate-200 border-2 border-white shadow-sm -mt-8 flex items-center justify-center text-xs font-semibold text-slate-500 shrink-0">
+                          {c.ownerName.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-slate-900 truncate">{c.businessName}</h3>
                         <p className="text-xs text-slate-500 flex items-center gap-1"><MapPin className="w-3 h-3" /> {c.location}</p>
@@ -234,11 +271,13 @@ export default function ContractorDiscoveryPage() {
                       {c.specializations.slice(0, 3).map((s) => (
                         <span key={s} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">{s}</span>
                       ))}
+                      {c.specializations.length === 0 && (
+                        <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-400 rounded-md">General</span>
+                      )}
                     </div>
                     <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
                       <div>
-                        <span className="text-sm font-bold text-slate-900">${c.hourlyRate}</span>
-                        <span className="text-xs text-slate-400">/hr</span>
+                        <span className="text-sm font-bold text-slate-900">{formatPricing(c.specializations[0], c.hourlyRate)}</span>
                         <span className="text-xs text-slate-400 ml-2">· {c.projectsCompleted} projects</span>
                       </div>
                       <Button size="sm" onClick={() => navigate('/')}>View</Button>
@@ -248,8 +287,9 @@ export default function ContractorDiscoveryPage() {
               </motion.div>
             ))}
           </div>
+          )}
 
-          {filtered.length === 0 && (
+          {!isLoading && filtered.length === 0 && (
             <div className="text-center py-20">
               <Wrench className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-slate-700">No contractors found</h3>
