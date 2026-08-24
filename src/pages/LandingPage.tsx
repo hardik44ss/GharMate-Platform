@@ -11,14 +11,66 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import StarRating from '@/components/ui/StarRating';
 import AuthModal from '@/components/AuthModal';
+import { useAuth } from '@/context/AuthContext';
+import type { UserRole } from '@/types';
 import { mockContractors } from '@/api/mockData';
 import { allSpecializations } from '@/api/mockData';
 import { toast } from 'sonner';
 
+const ROLE_PORTALS = [
+  {
+    role: 'ROLE_CLIENT' as UserRole,
+    path: 'client',
+    icon: Home,
+    eyebrow: 'For Homeowners',
+    title: 'Client Portal',
+    desc: 'Plan your dream home, get AI cost estimates, hire verified contractors and track every milestone.',
+    points: ['AI estimates & recommendations', 'Bookings and milestone tracking', 'Reviews & payments in one place'],
+  },
+  {
+    role: 'ROLE_CONTRACTOR' as UserRole,
+    path: 'contractor',
+    icon: Hammer,
+    eyebrow: 'For Professionals',
+    title: 'Contractor Portal',
+    desc: 'Showcase your work, win projects through competitive bids, manage labour and site progress.',
+    points: ['KYC verification badge', 'Kanban project management', 'Labour allocation & bids'],
+  },
+  {
+    role: 'ROLE_ADMIN' as UserRole,
+    path: 'admin',
+    icon: ShieldCheck,
+    eyebrow: 'For Operations',
+    title: 'Admin Console',
+    desc: 'Verify contractors, manage users across the platform and monitor platform-wide audit trails.',
+    points: ['KYC approval queue', 'User & role management', 'Platform metrics & audit logs'],
+  },
+];
+
 export default function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loggingIn, setLoggingIn] = useState<UserRole | null>(null);
   const navigate = useNavigate();
+  const { loginAsRole, isAuthenticated, user } = useAuth();
+
+  const handlePortalEnter = async (portal: (typeof ROLE_PORTALS)[number]) => {
+    // Already signed in with this role → go straight to the dashboard
+    if (isAuthenticated && user?.role === portal.role) {
+      navigate(`/dashboard/${portal.path}`);
+      return;
+    }
+    setLoggingIn(portal.role);
+    try {
+      await loginAsRole(portal.role);
+      toast.success(`Welcome to your ${portal.title}`);
+      navigate(`/dashboard/${portal.path}`);
+    } catch {
+      setAuthOpen(true);
+    } finally {
+      setLoggingIn(null);
+    }
+  };
 
   const formatContractorPricing = (specialization: string, rate: number) => {
     if (['New Home Construction', 'Civil Construction', 'Structural Work'].includes(specialization)) {
@@ -138,6 +190,54 @@ export default function LandingPage() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* Role Portals */}
+      <section id="portals" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-4">
+            <p className="text-[11px] font-semibold tracking-[0.24em] uppercase text-accent-600">One platform, three experiences</p>
+            <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-brand-950 font-display">Choose your workspace</h2>
+            <div className="gold-rule w-40 mx-auto mt-5" />
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 mt-12">
+            {ROLE_PORTALS.map((portal, i) => (
+              <motion.div
+                key={portal.role}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <div className="group relative h-full flex flex-col border border-brand-200/70 bg-brand-50/60 hover:bg-white rounded-2xl p-7 transition-all duration-300 hover:border-accent-400/60 hover:shadow-[0_20px_50px_-20px_rgba(41,38,32,0.25)] hover:-translate-y-1.5">
+                  <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-brand-400">{portal.eyebrow}</p>
+                  <div className="flex items-center gap-3 mt-3 mb-4">
+                    <div className="p-2.5 bg-brand-900 group-hover:bg-accent-500 rounded-xl transition-colors duration-300">
+                      <portal.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-brand-950 font-display">{portal.title}</h3>
+                  </div>
+                  <p className="text-sm text-brand-600 leading-relaxed mb-5">{portal.desc}</p>
+                  <ul className="space-y-2 mb-7 flex-1">
+                    {portal.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2 text-sm text-brand-700">
+                        <CheckCircle className="w-4 h-4 text-accent-600 shrink-0 mt-0.5" /> {point}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    onClick={() => handlePortalEnter(portal)}
+                    disabled={loggingIn !== null}
+                    className="w-full"
+                  >
+                    {loggingIn === portal.role ? 'Signing you in…' : isAuthenticated && user?.role === portal.role ? 'Open Dashboard' : `Enter as ${portal.title.split(' ')[0]}`}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 

@@ -34,6 +34,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
 
   const navLinks = [
     { label: 'Find Contractors', href: '/contractors' },
+    { label: 'Workspaces', href: '/#portals' },
     { label: 'How It Works', href: '/#how-it-works' },
     { label: 'AI Tools', href: '/#ai-tools' },
   ];
