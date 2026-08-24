@@ -6,6 +6,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import LandingPage from '@/pages/LandingPage';
 import ContractorDiscoveryPage from '@/pages/ContractorDiscoveryPage';
+import ContractorDetailPage from '@/pages/ContractorDetailPage';
 import ClientOverview from '@/pages/dashboard/client/ClientOverview';
 import AICostEstimator from '@/pages/dashboard/client/AICostEstimator';
 import AIRecommender from '@/pages/dashboard/client/AIRecommender';
@@ -39,6 +40,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/contractors" element={<ContractorDiscoveryPage />} />
+        <Route path="/contractors/:id" element={<ContractorDetailPage />} />
 
             {/* Client Dashboard */}
             <Route path="/dashboard/client" element={<ProtectedRoute allowedRoles={['ROLE_CLIENT']}><DashboardLayout /></ProtectedRoute>}>

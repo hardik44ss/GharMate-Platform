@@ -227,7 +227,7 @@ export default function ContractorDiscoveryPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
-                <Card hover className="overflow-hidden h-full flex flex-col">
+                <Card hover className="overflow-hidden h-full flex flex-col cursor-pointer" onClick={() => navigate(`/contractors/${c.id}`)}>
                   <div className="relative h-32 overflow-hidden">
                     {c.coverUrl ? (
                       <img src={c.coverUrl} alt={c.businessName} className="w-full h-full object-cover" />
@@ -280,7 +280,7 @@ export default function ContractorDiscoveryPage() {
                         <span className="text-sm font-bold text-slate-900">{formatPricing(c.specializations[0], c.hourlyRate)}</span>
                         <span className="text-xs text-slate-400 ml-2">· {c.projectsCompleted} projects</span>
                       </div>
-                      <Button size="sm" onClick={() => navigate('/')}>View</Button>
+                      <Button size="sm" onClick={() => navigate(`/contractors/${c.id}`)}>View Profile</Button>
                     </div>
                   </div>
                 </Card>
