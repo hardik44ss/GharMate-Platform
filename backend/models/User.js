@@ -40,8 +40,35 @@ const UserSchema = new mongoose.Schema(
     },
     kycStatus: {
       type: String,
-      enum: ['NOT_SUBMITTED', 'PENDING', 'APPROVED', 'REJECTED'],
+      enum: ['NOT_SUBMITTED', 'PENDING', 'VERIFIED', 'REJECTED'],
       default: 'NOT_SUBMITTED',
+    },
+    kycDocuments: {
+      type: [
+        {
+          type: {
+            type: String,
+            enum: ['government_id', 'license', 'certificate', 'other'],
+            default: 'other',
+          },
+          url: { type: String, default: '' },
+          uploadedAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
+    kycSubmittedAt: {
+      type: Date,
+      default: null,
+    },
+    kycVerifiedAt: {
+      type: Date,
+      default: null,
+    },
+    kycRejectionReason: {
+      type: String,
+      default: '',
+      maxlength: [500, 'Rejection reason cannot exceed 500 characters'],
     },
     avatarUrl: {
       type: String,
@@ -50,6 +77,51 @@ const UserSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    // ── Contractor-profile fields (only relevant for ROLE_CONTRACTOR) ──
+    businessName: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'Business name cannot exceed 100 characters'],
+      default: '',
+    },
+    businessDescription: {
+      type: String,
+      trim: true,
+      maxlength: [1000, 'Business description cannot exceed 1000 characters'],
+      default: '',
+    },
+    phone: {
+      type: String,
+      trim: true,
+      maxlength: [20, 'Phone cannot exceed 20 characters'],
+      default: '',
+    },
+    city: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'City cannot exceed 100 characters'],
+      default: '',
+    },
+    state: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'State cannot exceed 100 characters'],
+      default: '',
+    },
+    experienceYears: {
+      type: Number,
+      min: [0, 'Experience years cannot be negative'],
+      max: [100, 'Experience years cannot exceed 100'],
+      default: 0,
+    },
+    skills: {
+      type: [String],
+      default: [],
+    },
+    serviceCategories: {
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true }

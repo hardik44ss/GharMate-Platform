@@ -32,10 +32,9 @@ server.listen(config.port, () => {
   console.log(`└────────────────────────────────────────┘\n`);
 });
 
-// Handle unhandled promise rejections
+// Handle unhandled promise rejections — log only, don't take the server down.
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err.message);
-  server.close(() => process.exit(1));
 });
 
 // Graceful shutdown

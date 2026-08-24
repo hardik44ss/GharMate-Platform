@@ -9,6 +9,13 @@ const mongoSanitize = require('express-mongo-sanitize');
 
 const config = require('./config/env');
 const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+const contractorRoutes = require('./routes/contractor.routes');
+const projectRoutes = require('./routes/project.routes');
+const bidRoutes = require('./routes/bid.routes');
+const reviewRoutes = require('./routes/review.routes');
+const kycRoutes = require('./routes/kyc.routes');
+const adminRoutes = require('./routes/admin.routes');
 const errorHandler = require('./middleware/error.middleware');
 
 const app = express();
@@ -59,7 +66,25 @@ const authLimiter = rateLimit({
 app.use(generalLimiter);
 
 // ─── Routes ────────────────────────────────────────────────────────
+// DB guard — when MongoDB is unreachable, respond 503 immediately instead of
+// letting Mongoose queries buffer and hang the request. The frontend detects
+// the failure and falls back to demo/mock data instantly.
+const mongoose = require('mongoose');
+app.use('/api', (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ error: { message: 'Database unavailable — demo mode active.' } });
+  }
+  next();
+});
+
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/contractors', contractorRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/bids', bidRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/kyc', kycRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ─── Health Check ──────────────────────────────────────────────────
 app.get('/health', (req, res) => {

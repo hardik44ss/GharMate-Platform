@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "GharMate API",
+    "description": "GharMate Platform - API test collection. Import into Postman, set the baseUrl variable (default http://localhost:8080/api), register/login to grab a token, then paste it into the 'token' variable.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "http://localhost:8080/health", "host": ["http://localhost:8080"], "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /api/auth/register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Rahul Sharma\",\n  \"email\": \"rahul@gharmate.in\",\n  \"password\": \"Password123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "POST /api/auth/login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json && json.token) { pm.collectionVariables.set('token', json.token); }",
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"rahul@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "GET /api/auth/profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public Contractor Directory (new)",
+      "item": [
+        {
+          "name": "GET /api/contractors",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/contractors", "host": ["{{baseUrl}}"], "path": ["contractors"] }
+          }
+        },
+        {
+          "name": "GET /api/contractors/:id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/contractors/:id", "host": ["{{baseUrl}}"], "path": ["contractors", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "GET /api/contractors/profile (expect 401 unauth)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/contractors/profile", "host": ["{{baseUrl}}"], "path": ["contractors", "profile"] }
+          }
+        }
+      ]
+    },
+{
+      "name": "Projects",
+      "item": [
+        {
+          "name": "POST /api/projects",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Home Renovation\",\n  \"description\": \"Kitchen + bathroom renovation\",\n  \"budget\": 1500000,\n  \"location\": \"Gurugram, Haryana\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/projects", "host": ["{{baseUrl}}"], "path": ["projects"] }
+          }
+        },
+        {
+          "name": "GET /api/projects",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/projects", "host": ["{{baseUrl}}"], "path": ["projects"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "KYC (admin)",
+      "item": [
+        {
+          "name": "POST /api/kyc/submit",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documents\": [\n    { \"type\": \"government_id\", \"url\": \"https://example.com/id.jpg\" },\n    { \"type\": \"license\", \"url\": \"https://example.com/license.jpg\" }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/kyc/submit", "host": ["{{baseUrl}}"], "path": ["kyc", "submit"] }
+          }
+        },
+        {
+          "name": "GET /api/kyc/admin/pending",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/kyc/admin/pending", "host": ["{{baseUrl}}"], "path": ["kyc", "admin", "pending"] }
+          }
+        },
+        {
+          "name": "PUT /api/kyc/admin/:userId",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"VERIFIED\"\n}" },
+            "url": { "raw": "{{baseUrl}}/kyc/admin/:userId", "host": ["{{baseUrl}}"], "path": ["kyc", "admin", ":userId"], "variable": [{ "key": "userId", "value": "" }] }
+          }
+        }
+      ]
+    }
+  ]
+}
