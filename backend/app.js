@@ -20,6 +20,10 @@ const errorHandler = require('./middleware/error.middleware');
 
 const app = express();
 
+// Behind Render's/production reverse proxy: trust the first proxy hop so
+// express-rate-limit sees real client IPs (req.ip) instead of the proxy IP.
+app.set('trust proxy', 1);
+
 // ─── Security Middleware ───────────────────────────────────────────
 app.use(helmet());
 app.use(

@@ -1,0 +1,25 @@
+# Render Blueprint for the GharMate backend API.
+# Deploy: Render Dashboard -> New -> Blueprint -> select this repo.
+# Set the `sync: false` secrets in the Render dashboard after the first sync.
+services:
+  - type: web
+    name: gharmate-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false            # Atlas connection string — set in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true    # Render generates a strong random secret
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      - key: BCRYPT_ROUNDS
+        value: 12
+      - key: FRONTEND_URL
+        sync: false            # Your Vercel frontend URL, e.g. https://gharmate.vercel.app
