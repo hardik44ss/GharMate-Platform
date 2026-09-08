@@ -3,13 +3,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Search, SlidersHorizontal, ShieldCheck, Sparkles, MapPin,
-  Star, Wrench, X, ChevronDown,
+  Wrench, X, ChevronDown,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/layout/Navbar';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import StarRating from '@/components/ui/StarRating';
+import Avatar from '@/components/ui/Avatar';
+import CoverImage from '@/components/ui/CoverImage';
 import { apiService } from '@/api/apiService';
 import { allSpecializations, allLocations } from '@/api/mockData';
 
@@ -61,7 +63,7 @@ export default function ContractorDiscoveryPage() {
       return a.hourlyRate - b.hourlyRate;
     });
     return result;
-  }, [query, selectedSpecs, selectedLocation, minRating, verifiedOnly, sortBy]);
+  }, [contractors, query, selectedSpecs, selectedLocation, minRating, verifiedOnly, sortBy]);
 
   const toggleSpec = (spec: string) => {
     setSelectedSpecs((prev) => prev.includes(spec) ? prev.filter((s) => s !== spec) : [...prev, spec]);
@@ -229,11 +231,7 @@ export default function ContractorDiscoveryPage() {
               >
                 <Card hover className="overflow-hidden h-full flex flex-col cursor-pointer" onClick={() => navigate(`/contractors/${c.id}`)}>
                   <div className="relative h-32 overflow-hidden">
-                    {c.coverUrl ? (
-                      <img src={c.coverUrl} alt={c.businessName} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-brand-600 to-brand-700" />
-                    )}
+                    <CoverImage src={c.coverUrl} alt={c.businessName} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
                     {c.verified && (
                       <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full">
@@ -250,13 +248,8 @@ export default function ContractorDiscoveryPage() {
                   </div>
                   <div className="p-5 flex-1 flex flex-col">
                     <div className="flex items-start gap-3">
-                      {c.avatarUrl ? (
-                        <img src={c.avatarUrl} alt={c.ownerName} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm -mt-8" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-slate-200 border-2 border-white shadow-sm -mt-8 flex items-center justify-center text-xs font-semibold text-slate-500 shrink-0">
-                          {c.ownerName.slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
+                      {/* relative z-10 keeps the avatar above the `relative` cover block it overlaps */}
+                      <Avatar src={c.avatarUrl} name={c.ownerName} className="relative z-10 w-12 h-12 shrink-0 rounded-full object-cover border-2 border-white shadow-sm -mt-8 text-sm" />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-slate-900 truncate">{c.businessName}</h3>
                         <p className="text-xs text-slate-500 flex items-center gap-1"><MapPin className="w-3 h-3" /> {c.location}</p>
@@ -275,12 +268,12 @@ export default function ContractorDiscoveryPage() {
                         <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-400 rounded-md">General</span>
                       )}
                     </div>
-                    <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
-                      <div>
-                        <span className="text-sm font-bold text-slate-900">{formatPricing(c.specializations[0], c.hourlyRate)}</span>
-                        <span className="text-xs text-slate-400 ml-2">· {c.projectsCompleted} projects</span>
+                    <div className="mt-auto pt-4 flex items-center justify-between gap-3 border-t border-slate-100">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 truncate">{formatPricing(c.specializations[0], c.hourlyRate)}</p>
+                        <p className="text-xs text-slate-400">{c.projectsCompleted} projects</p>
                       </div>
-                      <Button size="sm" onClick={() => navigate(`/contractors/${c.id}`)}>View Profile</Button>
+                      <Button size="sm" className="shrink-0 whitespace-nowrap" onClick={(e) => { e.stopPropagation(); navigate(`/contractors/${c.id}`); }}>View Profile</Button>
                     </div>
                   </div>
                 </Card>

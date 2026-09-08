@@ -1,7 +1,7 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { Loader2 } from 'lucide-react';
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'accent';
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'accent' | 'light' | 'outlineLight';
 type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -18,6 +18,11 @@ const variants: Record<Variant, string> = {
   ghost: 'text-slate-600 hover:bg-slate-100 focus:ring-slate-200',
   danger: 'bg-red-600 text-white hover:bg-red-700 shadow-soft focus:ring-red-300',
   accent: 'bg-accent-500 text-white hover:bg-accent-600 shadow-soft focus:ring-accent-300',
+  // For use on dark surfaces. Passing `bg-white`/`text-white` through `className`
+  // is unreliable — Tailwind resolves conflicts by stylesheet order, not class
+  // order, so the variant's own colour can win and hide the label.
+  light: 'bg-white text-brand-800 hover:bg-brand-50 shadow-soft focus:ring-white/70 focus:ring-offset-brand-900',
+  outlineLight: 'border border-white/40 text-white hover:bg-white/15 focus:ring-white/60 focus:ring-offset-brand-900',
 };
 
 const sizes: Record<Size, string> = {

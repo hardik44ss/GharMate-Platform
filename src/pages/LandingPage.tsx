@@ -3,15 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Search, ShieldCheck, Calculator, Sparkles, Star, ArrowRight,
-  Hammer, Wrench, Home, FileCheck, Users, TrendingUp, Quote,
+  Hammer, Home, FileCheck, Users, Quote,
   Mail, CheckCircle, Lock, Zap,
 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import StarRating from '@/components/ui/StarRating';
+import Avatar from '@/components/ui/Avatar';
+import CoverImage from '@/components/ui/CoverImage';
 import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/context/AuthContext';
+import { apiService } from '@/api/apiService';
 import type { UserRole } from '@/types';
 import { mockContractors } from '@/api/mockData';
 import { allSpecializations } from '@/api/mockData';
@@ -51,6 +54,8 @@ export default function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loggingIn, setLoggingIn] = useState<UserRole | null>(null);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
   const navigate = useNavigate();
   const { loginAsRole, isAuthenticated, user } = useAuth();
 
@@ -84,6 +89,23 @@ export default function LandingPage() {
 
   const handleSearch = () => {
     navigate(`/contractors${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`);
+  };
+
+  const handleSubscribe = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const email = newsletterEmail.trim();
+    if (!email) return;
+    setSubscribing(true);
+    try {
+      await apiService.subscribeToNewsletter(email);
+      toast.success('Thanks for subscribing!', { description: `We'll send project tips to ${email}.` });
+      // Clear the field so the form is ready for the next subscriber
+      setNewsletterEmail('');
+    } catch {
+      toast.error('Could not subscribe right now. Please try again.');
+    } finally {
+      setSubscribing(false);
+    }
   };
 
   return (
@@ -355,7 +377,7 @@ export default function LandingPage() {
               >
                 <Card hover className="overflow-hidden h-full flex flex-col">
                   <div className="relative h-32 overflow-hidden">
-                    <img src={c.coverUrl} alt={c.businessName} className="w-full h-full object-cover" />
+                    <CoverImage src={c.coverUrl} alt={c.businessName} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
                     {c.verified && (
                       <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full">
@@ -372,7 +394,8 @@ export default function LandingPage() {
                   </div>
                   <div className="p-5 flex-1 flex flex-col">
                     <div className="flex items-start gap-3">
-                      <img src={c.avatarUrl} alt={c.ownerName} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm -mt-8" />
+                      {/* relative z-10 keeps the avatar above the `relative` cover block it overlaps */}
+                      <Avatar src={c.avatarUrl} name={c.ownerName} className="relative z-10 w-12 h-12 shrink-0 rounded-full object-cover border-2 border-white shadow-sm -mt-8 text-sm" />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-slate-900 truncate">{c.businessName}</h3>
                         <p className="text-xs text-slate-500">{c.location} · {c.yearsActive} yrs</p>
@@ -387,9 +410,9 @@ export default function LandingPage() {
                         <span key={s} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">{s}</span>
                       ))}
                     </div>
-                    <div className="mt-auto pt-4 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-slate-700">{formatContractorPricing(c.specializations[0], c.hourlyRate)}</span>
-                      <Button size="sm" variant="ghost" onClick={() => navigate('/contractors')}>View Profile</Button>
+                    <div className="mt-auto pt-4 flex items-center justify-between gap-3">
+                      <span className="text-sm font-semibold text-slate-700 min-w-0 truncate">{formatContractorPricing(c.specializations[0], c.hourlyRate)}</span>
+                      <Button size="sm" variant="ghost" className="shrink-0 whitespace-nowrap" onClick={() => navigate('/contractors')}>View Profile</Button>
                     </div>
                   </div>
                 </Card>
@@ -441,10 +464,10 @@ export default function LandingPage() {
           <h2 className="text-3xl sm:text-4xl font-bold text-white font-display">Ready to build your next project?</h2>
           <p className="mt-3 text-white/70 max-w-xl mx-auto">Plan your construction, find verified professionals and track your project with GharMate.</p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button size="lg" onClick={() => setAuthOpen(true)} className="bg-white text-brand-800 hover:bg-white/90">
+            <Button size="lg" variant="light" onClick={() => setAuthOpen(true)}>
               Start Your Project <ArrowRight className="w-5 h-5" />
             </Button>
-            <Button size="lg" variant="ghost" onClick={() => navigate('/contractors')} className="text-white border-white/30 hover:bg-white/10">
+            <Button size="lg" variant="outlineLight" onClick={() => navigate('/contractors')}>
               Explore Contractors
             </Button>
           </div>
@@ -463,14 +486,19 @@ export default function LandingPage() {
           </div>
 
           <div className="max-w-md mx-auto">
-            <form onSubmit={(e) => { e.preventDefault(); toast.success('Thanks for subscribing!'); }} className="flex flex-col sm:flex-row gap-3">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
                 required
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
                 placeholder="you@example.com"
+                aria-label="Email address"
                 className="flex-1 px-4 py-3 text-sm border border-slate-200 rounded-xl bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
               />
-              <Button type="submit" size="lg">Subscribe <ArrowRight className="w-4 h-4" /></Button>
+              <Button type="submit" size="lg" loading={subscribing} disabled={subscribing}>
+                {subscribing ? 'Subscribing…' : <>Subscribe <ArrowRight className="w-4 h-4" /></>}
+              </Button>
             </form>
             <p className="text-xs text-slate-400 text-center mt-3">By subscribing you agree to our Privacy Policy.</p>
           </div>

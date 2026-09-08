@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -13,7 +13,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import { toast } from 'sonner';
-import type { Milestone, Project } from '@/types';
+import type { Milestone } from '@/types';
 
 const milestoneIcons = {
   COMPLETED: CheckCircle2,
@@ -27,6 +27,12 @@ const milestoneColors = {
   PENDING: 'text-slate-400 bg-slate-50',
 };
 
+const ACCEPTED_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+
+const formatBytes = (bytes: number) =>
+  bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
 export default function BookingManager() {
   const { user } = useAuth();
   const { data: projects = [] } = useQuery({
@@ -34,13 +40,58 @@ export default function BookingManager() {
     queryFn: apiService.getMyProjects,
   });
   const myProjects = projects;
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = () => {
-    toast.success('Document uploaded successfully');
+  const addFiles = (incoming: FileList | null) => {
+    if (!incoming?.length) return;
+    const accepted: File[] = [];
+    for (const file of Array.from(incoming)) {
+      if (!ACCEPTED_TYPES.includes(file.type)) {
+        toast.error(`${file.name} is not a PDF, JPG or PNG file.`);
+        continue;
+      }
+      if (file.size > MAX_FILE_BYTES) {
+        toast.error(`${file.name} is larger than 10MB.`);
+        continue;
+      }
+      accepted.push(file);
+    }
+    if (accepted.length) {
+      // De-duplicate by name + size so re-picking the same file does not stack up
+      setFiles((prev) => {
+        const seen = new Set(prev.map((f) => `${f.name}:${f.size}`));
+        return [...prev, ...accepted.filter((f) => !seen.has(`${f.name}:${f.size}`))];
+      });
+    }
+  };
+
+  const removeFile = (index: number) => setFiles((prev) => prev.filter((_, i) => i !== index));
+
+  const closeUpload = () => {
     setUploadOpen(false);
+    setFiles([]);
+    setDragOver(false);
+  };
+
+  const handleUpload = async () => {
+    if (!files.length) {
+      toast.error('Select at least one file to upload.');
+      return;
+    }
+    setUploading(true);
+    try {
+      await apiService.uploadProjectDocuments(files);
+      toast.success(`${files.length} document${files.length > 1 ? 's' : ''} uploaded successfully`);
+      closeUpload();
+    } catch {
+      toast.error('Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -120,20 +171,68 @@ export default function BookingManager() {
       </div>
 
       {/* Upload Modal */}
-      <Modal open={uploadOpen} onClose={() => setUploadOpen(false)} title="Upload Document" subtitle="Securely upload project documents to Cloudinary." size="md"
-        footer={<><Button variant="ghost" onClick={() => setUploadOpen(false)}>Cancel</Button><Button onClick={handleUpload}><Upload className="w-4 h-4" /> Upload</Button></>}
+      <Modal open={uploadOpen} onClose={closeUpload} title="Upload Document" subtitle="Securely upload project documents to Cloudinary." size="md"
+        footer={
+          <>
+            <Button variant="ghost" onClick={closeUpload}>Cancel</Button>
+            <Button onClick={handleUpload} loading={uploading} disabled={uploading || files.length === 0}>
+              <Upload className="w-4 h-4" /> {uploading ? 'Uploading…' : `Upload${files.length ? ` (${files.length})` : ''}`}
+            </Button>
+          </>
+        }
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept={ACCEPTED_TYPES.join(',')}
+          className="hidden"
+          onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }}
+        />
         <div
+          role="button"
+          tabIndex={0}
+          onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => { e.preventDefault(); setDragOver(false); toast.success('File added'); }}
-          className={`border-2 border-dashed rounded-xl p-10 text-center transition-colors ${dragOver ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-slate-300'}`}
+          onDrop={(e) => { e.preventDefault(); setDragOver(false); addFiles(e.dataTransfer.files); }}
+          className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors outline-none focus-visible:border-brand-500 ${dragOver ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-slate-300'}`}
         >
           <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
           <p className="text-sm font-semibold text-slate-700">Drag & drop files here</p>
           <p className="text-xs text-slate-500 mt-1">or click to browse. PDF, JPG, PNG up to 10MB.</p>
-          <Button variant="outline" size="sm" className="mt-4">Browse Files</Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+          >
+            Browse Files
+          </Button>
         </div>
+
+        {files.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <p className="text-xs font-semibold text-slate-500 uppercase">Selected ({files.length})</p>
+            {files.map((file, i) => (
+              <div key={`${file.name}-${file.size}`} className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                <FileText className="w-4 h-4 text-brand-600 shrink-0" />
+                <span className="text-sm text-slate-700 truncate flex-1">{file.name}</span>
+                <span className="text-xs text-slate-400 shrink-0">{formatBytes(file.size)}</span>
+                <button
+                  type="button"
+                  aria-label={`Remove ${file.name}`}
+                  onClick={() => removeFile(i)}
+                  className="text-slate-400 hover:text-red-600 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </Modal>
     </div>
   );
