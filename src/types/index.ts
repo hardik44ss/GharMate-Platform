@@ -155,3 +155,10 @@ export interface ContractorMatch {
   matchScore: number;
   matchReasons: string[];
 }
+
+/** Router state handed from the cost estimator to the AI recommender */
+export interface RecommenderPrefill {
+  projectType: string;
+  location: string;
+  budget: number;
+}

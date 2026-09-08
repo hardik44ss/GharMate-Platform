@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calculator, Sparkles, TrendingUp, Clock, DollarSign, Loader2 } from 'lucide-react';
@@ -7,9 +8,10 @@ import DashboardHeader from '../DashboardHeader';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { allSpecializations, allLocations } from '@/api/mockData';
-import type { CostEstimate } from '@/types';
+import type { CostEstimate, RecommenderPrefill } from '@/types';
 
 export default function AICostEstimator() {
+  const navigate = useNavigate();
   const [projectType, setProjectType] = useState('New Home Construction');
   const [squareFootage, setSquareFootage] = useState(200);
   const [materialQuality, setMaterialQuality] = useState('Standard');
@@ -25,6 +27,18 @@ export default function AICostEstimator() {
   const handleEstimate = async () => {
     const res = await refetch();
     if (res.data) setEstimate(res.data);
+  };
+
+  /** Carry the estimate into the AI Recommender so it can match on this budget */
+  const handleFindContractors = () => {
+    if (!estimate) return;
+    navigate('/dashboard/client/recommender', {
+      state: {
+        projectType,
+        location,
+        budget: estimate.midpoint,
+      } satisfies RecommenderPrefill,
+    });
   };
 
   const formatCurrency = (n: number) => `₹${n.toLocaleString('en-IN')}`;
@@ -131,7 +145,7 @@ export default function AICostEstimator() {
                       This is an AI-assisted estimate for planning. Actual contractor quotations may vary based on site conditions, scope changes, and material selections.
                     </p>
                   </div>
-                  <Button fullWidth className="mt-4" variant="primary">
+                  <Button fullWidth className="mt-4" variant="primary" onClick={handleFindContractors}>
                     <DollarSign className="w-4 h-4" /> Find Contractors in Budget
                   </Button>
                 </Card>

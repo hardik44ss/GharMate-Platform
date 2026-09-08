@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Hammer, Menu, X, ChevronDown, LayoutDashboard, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import Button from '@/components/ui/Button';
+import Avatar from '@/components/ui/Avatar';
 
 interface NavbarProps {
   onAuthClick: () => void;
@@ -76,11 +77,9 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
               <div className="relative">
                 <button
                   onClick={() => setUserMenu(!userMenu)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-colors ${
-                    scrolled ? 'hover:bg-slate-100' : 'hover:bg-white/10'
-                  }`}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl transition-colors hover:bg-slate-100"
                 >
-                  <img src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.fullName}&background=292620&color=fff`} alt={user.fullName} className="w-8 h-8 rounded-full object-cover" />
+                  <Avatar src={user.avatarUrl} name={user.fullName} className="w-8 h-8 shrink-0 rounded-full object-cover text-xs" />
                   <span className="text-sm font-semibold text-slate-700">{user.fullName.split(' ')[0]}</span>
                   <ChevronDown className="w-4 h-4 text-slate-400" />
                 </button>
@@ -111,7 +110,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
                 <button onClick={onAuthClick} className="text-sm font-semibold text-slate-700 hover:text-slate-900">
                   Sign In
                 </button>
-                <Button size="sm" onClick={onAuthClick} className={!scrolled ? 'bg-white text-brand-800 hover:bg-white/90' : ''}>
+                <Button size="sm" onClick={onAuthClick}>
                   Get Started
                 </Button>
               </>

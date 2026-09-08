@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Ban, CheckCircle2, Users, Wrench, Home, Shield } from 'lucide-react';
 import DashboardHeader from '../DashboardHeader';
@@ -18,15 +18,26 @@ interface ManagedUser {
   joined: string;
 }
 
+/** Directory rows, deduplicated by id — a contractor's login can also appear in mockUsers */
+const DIRECTORY: Omit<ManagedUser, 'status'>[] = (() => {
+  const rows = [
+    ...mockUsers.map((u) => ({ id: u.id, name: u.fullName, email: u.email, role: u.role, joined: '2026-01-15' })),
+    ...mockContractors.slice(0, 5).map((c) => ({ id: c.userId, name: c.ownerName, email: `contact@${c.businessName.toLowerCase().replace(/[^a-z]/g, '')}.com`, role: 'ROLE_CONTRACTOR' as UserRole, joined: '2026-02-20' })),
+    { id: 'u-spam-1', name: 'Spam Account', email: 'spam@temp.com', role: 'ROLE_CLIENT' as UserRole, joined: '2026-08-01' },
+  ];
+  return [...new Map(rows.map((r) => [r.id, r])).values()];
+})();
+
 export default function UserManagement() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'ALL' | UserRole>('ALL');
+  // Blocked accounts are held here so a block/unblock actually sticks in the table
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(() => new Set(['u-spam-1']));
 
-  const users: ManagedUser[] = [
-    ...mockUsers.map((u) => ({ id: u.id, name: u.fullName, email: u.email, role: u.role, status: 'ACTIVE' as const, joined: '2026-01-15' })),
-    ...mockContractors.slice(0, 5).map((c) => ({ id: c.userId, name: c.ownerName, email: `contact@${c.businessName.toLowerCase().replace(/[^a-z]/g, '')}.com`, role: 'ROLE_CONTRACTOR' as UserRole, status: 'ACTIVE' as const, joined: '2026-02-20' })),
-    { id: 'u-spam-1', name: 'Spam Account', email: 'spam@temp.com', role: 'ROLE_CLIENT', status: 'BLOCKED', joined: '2026-08-01' },
-  ];
+  const users: ManagedUser[] = useMemo(
+    () => DIRECTORY.map((u) => ({ ...u, status: blockedIds.has(u.id) ? 'BLOCKED' : 'ACTIVE' })),
+    [blockedIds]
+  );
 
   const filtered = users.filter((u) => {
     if (roleFilter !== 'ALL' && u.role !== roleFilter) return false;
@@ -38,7 +49,17 @@ export default function UserManagement() {
   const roleLabels: Record<UserRole, string> = { ROLE_CLIENT: 'Client', ROLE_CONTRACTOR: 'Contractor', ROLE_ADMIN: 'Admin' };
 
   const toggleBlock = (user: ManagedUser) => {
-    toast.success(user.status === 'ACTIVE' ? `${user.name} has been blocked` : `${user.name} has been unblocked`);
+    const willBlock = user.status === 'ACTIVE';
+    setBlockedIds((prev) => {
+      const next = new Set(prev);
+      if (willBlock) next.add(user.id);
+      else next.delete(user.id);
+      return next;
+    });
+    toast.success(
+      willBlock ? `${user.name} has been blocked` : `${user.name} has been unblocked`,
+      { description: willBlock ? 'They can no longer sign in to GharMate.' : 'Their account access has been restored.' }
+    );
   };
 
   return (

@@ -6,15 +6,17 @@ import {
   Users, Clock, CheckCircle2, ChevronRight, Ruler, Hammer, Quote, Send, X, BadgeCheck, MapPin,
 } from 'lucide-react';
 import { mockContractors, mockProjects, mockReviews } from '@/api/mockData';
+import Avatar from '@/components/ui/Avatar';
+import CoverImage from '@/components/ui/CoverImage';
 import type { Review, Project } from '@/types';
 
 const GALLERY = [
   'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600&fit=crop',
   'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&h=600&fit=crop',
   'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1581244277913-9f8760d2e9c0?w=800&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1562259949-5c8e95e6c4be?w=800&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1558618666fcd6c8a6e9c8b0?w=800&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop',
 ];
 
 const WEEK_SCHEDULE = [
@@ -65,7 +67,7 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div className="mb-7">
-      <p className="text-[11px] font-semibold tracking-[0.22em] uppercase text-accent-400/80">{eyebrow}</p>
+      <p className="text-[11px] font-semibold tracking-[0.22em] uppercase text-accent-700">{eyebrow}</p>
       <div className="flex items-end justify-between gap-4 mt-1">
         <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-brand-900">{title}</h2>
         <div className="gold-rule flex-1 max-w-40 mb-2 hidden sm:block" />
@@ -105,21 +107,21 @@ export default function ContractorDetailPage() {
         initial={{ y: -70, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', damping: 22, stiffness: 220 }}
-        className="sticky top-0 z-40 bg-brand-50/85 backdrop-blur-xl border-b border-brand-200/`10"
+        className="sticky top-0 z-40 bg-brand-50/85 backdrop-blur-xl border-b border-brand-200/10"
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <button
             onClick={() => window.history.back()}
             className="group flex items-center gap-2.5 text-sm font-medium text-brand-700 hover:text-brand-900 transition-colors"
           >
-            <span className="p-1.5 rounded-lg border border-brand-200/`15 group-hover:border-accent-400/50 group-hover:bg-brand-100 transition-all">
+            <span className="p-1.5 rounded-lg border border-brand-200/15 group-hover:border-accent-400/50 group-hover:bg-brand-100 transition-all">
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
             </span>
             Back to results
           </button>
           <Link to="/" className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity">
-            <div className="p-1.5 bg-brand-700 rounded-lg"><Hammer className="w-4 h-4 text-brand-900" /></div>
-            <span className="font-serif text-lg font-bold">GharMate</span>
+            <div className="p-1.5 bg-brand-700 rounded-lg"><Hammer className="w-4 h-4 text-white" /></div>
+            <span className="font-serif text-lg font-bold text-brand-900">GharMate</span>
           </Link>
         </div>
       </motion.header>
@@ -132,8 +134,9 @@ export default function ContractorDetailPage() {
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           className="absolute inset-0"
         >
-          <img src={contractor.coverUrl} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-brand-50" />
+          <CoverImage src={contractor.coverUrl} alt="" className="w-full h-full object-cover" />
+          {/* Scrim strong enough that the hero copy stays legible over any cover photo */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/65 to-brand-50" />
         </motion.div>
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-10 sm:pt-20">
@@ -151,7 +154,7 @@ export default function ContractorDetailPage() {
                 <Sparkles className="w-3.5 h-3.5" /> AI Recommended
               </span>
             )}
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-100 border border-brand-200/`15 text-xs font-medium text-brand-700 backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-100 border border-brand-200/15 text-xs font-medium text-brand-700 backdrop-blur-sm">
               <Clock className="w-3.5 h-3.5" /> {contractor.yearsActive} years in business
             </span>
           </motion.div>
@@ -164,14 +167,12 @@ export default function ContractorDetailPage() {
               className="relative shrink-0 w-fit"
             >
               <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-accent-400/50 to-brand-500/40 blur-md opacity-60" />
-              {contractor.avatarUrl ? (
-                <img src={contractor.avatarUrl} alt={contractor.ownerName}
-                  className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover border border-brand-200/`20" />
-              ) : (
-                <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-brand-900 border border-brand-200/`20 flex items-center justify-center font-serif text-2xl font-bold text-accent-300">
-                  {contractor.ownerName.slice(0, 2).toUpperCase()}
-                </div>
-              )}
+              <Avatar
+                src={contractor.avatarUrl}
+                name={contractor.ownerName}
+                tone="dark"
+                className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover border border-brand-200/20 font-display text-2xl"
+              />
             </motion.div>
 
             <motion.div
@@ -179,15 +180,15 @@ export default function ContractorDetailPage() {
               transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="flex-1 min-w-0"
             >
-              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-accent-400/90 mb-1">Contractor Profile</p>
-              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight">{contractor.businessName}</h1>
-              <p className="mt-2.5 text-brand-700 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4 text-accent-400/80" /> {contractor.ownerName}</span>
-                <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4 text-accent-400/80" /> {contractor.location}</span>
+              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-accent-300 mb-1">Contractor Profile</p>
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]">{contractor.businessName}</h1>
+              <p className="mt-2.5 text-white/85 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4 text-accent-300" /> {contractor.ownerName}</span>
+                <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4 text-accent-300" /> {contractor.location}</span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Star className="w-4 h-4 fill-accent-400 text-accent-400" />
-                  <strong className="text-brand-900">{contractor.rating.toFixed(1)}</strong>
-                  <span className="text-brand-500">({contractor.reviewCount.toLocaleString('en-IN')} reviews)</span>
+                  <Star className="w-4 h-4 fill-accent-300 text-accent-300" />
+                  <strong className="text-white">{contractor.rating.toFixed(1)}</strong>
+                  <span className="text-white/70">({contractor.reviewCount.toLocaleString('en-IN')} reviews)</span>
                 </span>
               </p>
 
@@ -203,7 +204,7 @@ export default function ContractorDetailPage() {
                     transition={{ delay: 0.45 + i * 0.08, duration: 0.5 }}
                     className="dark-panel dark-panel-hover px-4 py-3"
                   >
-                    <s.icon className="w-4 h-4 text-accent-400/80 mb-1.5" />
+                    <s.icon className="w-4 h-4 text-accent-600 mb-1.5" />
                     <p className="text-xl font-bold leading-none"><CountUp value={s.value} decimals={s.decimals} suffix={s.suffix} /></p>
                     <p className="text-[11px] text-brand-500 mt-1">{s.label}</p>
                   </motion.div>
@@ -218,12 +219,12 @@ export default function ContractorDetailPage() {
             >
               <div className="dark-panel p-5 bg-white backdrop-blur-md">
                 <p className="text-[11px] uppercase tracking-wider text-brand-500">Starting from</p>
-                <p className="font-serif text-3xl font-bold text-accent-300 mt-1">{priceLabel}</p>
+                <p className="font-serif text-3xl font-bold text-accent-700 mt-1">{priceLabel}</p>
                 <div className="gold-rule my-4" />
                 <ul className="space-y-2 text-xs text-brand-700 mb-5">
                   {['Free site visit & quote', 'Milestone-based payments', 'Dedicated site supervisor'].map((t) => (
                     <li key={t} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" /> {t}
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" /> {t}
                     </li>
                   ))}
                 </ul>
@@ -248,12 +249,12 @@ export default function ContractorDetailPage() {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={`relative shrink-0 px-5 py-3.5 text-sm font-semibold transition-colors ${
-                tab === t.key ? 'text-accent-300' : 'text-brand-500 hover:text-brand-800'
+                tab === t.key ? 'text-accent-700' : 'text-brand-500 hover:text-brand-800'
               }`}
             >
               {t.label}
               {t.count !== undefined && (
-                <span className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-accent-400/20 text-accent-300' : 'bg-brand-100 text-brand-500'}`}>
+                <span className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-accent-100 text-accent-700' : 'bg-brand-100 text-brand-500'}`}>
                   {t.count}
                 </span>
               )}
@@ -299,7 +300,7 @@ export default function ContractorDetailPage() {
                           viewport={{ once: true }}
                           transition={{ delay: i * 0.06, type: 'spring', damping: 16, stiffness: 260 }}
                           whileHover={{ y: -3 }}
-                          className="px-4 py-2 rounded-full border border-brand-200/`15 bg-brand-50 text-sm font-medium text-brand-800 cursor-default"
+                          className="px-4 py-2 rounded-full border border-brand-200/15 bg-brand-50 text-sm font-medium text-brand-800 cursor-default"
                         >
                           {s}
                         </motion.span>
@@ -320,7 +321,7 @@ export default function ContractorDetailPage() {
                           {d.slots.length ? (
                             <div className="flex gap-2">
                               {d.slots.map((slot) => (
-                                <span key={slot} className="px-2.5 py-1 rounded-md bg-emerald-400/10 border border-emerald-400/25 text-xs font-semibold text-emerald-300">
+                                <span key={slot} className="px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700">
                                   {slot}
                                 </span>
                               ))}
@@ -339,7 +340,7 @@ export default function ContractorDetailPage() {
                     <div className="dark-panel p-6">
                       <h3 className="font-serif text-lg font-semibold mb-4">Contact & documents</h3>
                       {[['Business', contractor.ownerName], ['Service area', contractor.location], ['Response time', '~2 hours'], ['Payment terms', 'Milestone based']].map(([k, v]) => (
-                        <div key={k} className="flex items-center justify-between gap-3 pb-2.5 mb-2.5 border-b border-brand-200/`5 last:mb-0 last:border-0 last:pb-0">
+                        <div key={k} className="flex items-center justify-between gap-3 pb-2.5 mb-2.5 border-b border-brand-200/5 last:mb-0 last:border-0 last:pb-0">
                           <span className="text-brand-500 text-sm shrink-0">{k}</span>
                           <span className="font-semibold text-right text-brand-800 text-sm truncate">{v}</span>
                         </div>
@@ -347,7 +348,7 @@ export default function ContractorDetailPage() {
                       <div className="gold-rule my-4" />
                       <button
                         onClick={() => setBookingOpen(true)}
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-accent-400/40 text-accent-300 hover:bg-accent-400/10 text-sm font-semibold transition-all active:scale-[0.97]"
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-accent-600/50 text-accent-700 hover:bg-accent-50 text-sm font-semibold transition-all active:scale-[0.97]"
                       >
                         <Send className="w-4 h-4" /> Enquire Now
                       </button>
@@ -355,7 +356,7 @@ export default function ContractorDetailPage() {
                   </Reveal>
                   <Reveal delay={0.1}>
                     <div className="dark-panel p-5 flex items-start gap-3">
-                      <Quote className="w-6 h-6 text-accent-400/60 shrink-0 rotate-180" />
+                      <Quote className="w-6 h-6 text-accent-500/70 shrink-0 rotate-180" />
                       <p className="text-sm italic text-brand-700 leading-relaxed">
                         Quality is remembered long after the price is forgotten — we build like it's our own home.
                       </p>
@@ -382,9 +383,9 @@ export default function ContractorDetailPage() {
                     transition={{ delay: i * 0.07, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => setActiveShot(src)}
-                    className="group relative rounded-2xl overflow-hidden border border-brand-200/`10 aspect-[4/3]"
+                    className="group relative rounded-2xl overflow-hidden border border-brand-200/10 aspect-[4/3]"
                   >
-                    <img src={src} alt={`Work ${i + 1}`} loading="lazy"
+                    <CoverImage src={src} alt={`Work ${i + 1}`}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <span className="absolute bottom-3 left-4 text-xs font-semibold text-brand-900 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
@@ -409,14 +410,14 @@ export default function ContractorDetailPage() {
                   {projects.map((p, i) => (
                     <Reveal key={p.id} delay={i * 0.08}>
                       <div className="dark-panel dark-panel-hover overflow-hidden h-full flex flex-col">
-                        <img src={GALLERY[i % GALLERY.length]} alt={p.title} loading="lazy" className="w-full h-40 object-cover" />
+                        <CoverImage src={GALLERY[i % GALLERY.length]} alt={p.title} className="w-full h-40 object-cover" />
                         <div className="p-5 flex-1 flex flex-col">
                           <div className="flex items-center justify-between gap-3 mb-2">
                             <h3 className="font-serif font-semibold text-lg leading-snug">{p.title}</h3>
                             <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                              p.status === 'COMPLETED' ? 'bg-emerald-400/15 text-emerald-300'
-                              : p.status === 'REQUESTED' ? 'bg-sky-400/15 text-sky-300'
-                              : 'bg-accent-400/15 text-accent-300'}`}>
+                              p.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700'
+                              : p.status === 'REQUESTED' ? 'bg-sky-50 text-sky-700'
+                              : 'bg-accent-100 text-accent-700'}`}>
                               {p.status.replace('_', ' ')}
                             </span>
                           </div>
@@ -424,7 +425,7 @@ export default function ContractorDetailPage() {
                           <div className="mt-auto pt-4">
                             <div className="flex justify-between text-xs text-brand-500 mb-2">
                               <span>{p.category}</span>
-                              <span className="font-bold text-accent-300">₹{(p.budget / 100000).toFixed(1)}L</span>
+                              <span className="font-bold text-accent-700">₹{(p.budget / 100000).toFixed(1)}L</span>
                             </div>
                             <div className="h-1.5 bg-brand-100 rounded-full overflow-hidden">
                               <motion.div
@@ -468,7 +469,7 @@ export default function ContractorDetailPage() {
                           ))}
                         </div>
                         <p className="text-brand-800 leading-relaxed">“{r.comment}”</p>
-                        <div className="mt-4 pt-3 border-t border-brand-200/`5 flex items-center justify-between">
+                        <div className="mt-4 pt-3 border-t border-brand-200/5 flex items-center justify-between">
                           <span className="text-sm font-semibold">{r.clientName}</span>
                           <span className="text-xs text-brand-400">
                             {new Date(r.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -496,7 +497,7 @@ export default function ContractorDetailPage() {
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.92, opacity: 0 }}
               transition={{ type: 'spring', damping: 24, stiffness: 260 }}
               src={activeShot} alt="Work preview"
-              className="max-w-4xl w-full rounded-2xl border border-brand-200/`15"
+              className="max-w-4xl w-full rounded-2xl border border-brand-200/15"
             />
             <button className="absolute top-6 right-6 p-2.5 rounded-xl bg-brand-100 hover:bg-brand-200 transition-colors">
               <X className="w-5 h-5" />
@@ -536,7 +537,7 @@ export default function ContractorDetailPage() {
                     transition={{ type: 'spring', damping: 12, stiffness: 200 }}
                     className="mx-auto mb-5 w-14 h-14 rounded-full bg-emerald-400/15 flex items-center justify-center"
                   >
-                    <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+                    <CheckCircle2 className="w-7 h-7 text-emerald-600" />
                   </motion.div>
                   <h3 className="font-serif text-2xl font-semibold">Request sent!</h3>
                   <p className="text-sm text-brand-500 mt-2 leading-relaxed">
@@ -551,7 +552,7 @@ export default function ContractorDetailPage() {
                 </div>
               ) : (
                 <>
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-accent-400/80">Free consultation</p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-accent-700">Free consultation</p>
                   <h3 className="font-serif text-2xl font-semibold mt-1">Book {contractor.businessName}</h3>
                   <div className="gold-rule my-4" />
 
@@ -563,28 +564,28 @@ export default function ContractorDetailPage() {
                       <label htmlFor="booking-name" className="block text-xs font-semibold text-brand-700 mb-1.5">Your name</label>
                       <input
                         id="booking-name" required placeholder="e.g. Priya Sharma"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-brand-100 border border-brand-200/`10 focus:border-accent-400/60 focus:outline-none text-sm placeholder:text-brand-400 transition-colors"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-brand-100 border border-brand-200/10 focus:border-accent-400/60 focus:outline-none text-sm placeholder:text-brand-400 transition-colors"
                       />
                     </div>
                     <div>
                       <label htmlFor="booking-phone" className="block text-xs font-semibold text-brand-700 mb-1.5">Phone</label>
                       <input
                         id="booking-phone" required type="tel" pattern="[0-9+ -]{10,15}" placeholder="+91 98765 43210"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-brand-100 border border-brand-200/`10 focus:border-accent-400/60 focus:outline-none text-sm placeholder:text-brand-400 transition-colors"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-brand-100 border border-brand-200/10 focus:border-accent-400/60 focus:outline-none text-sm placeholder:text-brand-400 transition-colors"
                       />
                     </div>
                     <div>
                       <label htmlFor="booking-date" className="block text-xs font-semibold text-brand-700 mb-1.5">Preferred date</label>
                       <input
                         id="booking-date" required type="date"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-brand-100 border border-brand-200/`10 focus:border-accent-400/60 focus:outline-none text-sm [color-scheme:dark] transition-colors"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-brand-100 border border-brand-200/10 focus:border-accent-400/60 focus:outline-none text-sm [color-scheme:light] transition-colors"
                       />
                     </div>
                     <div>
                       <label htmlFor="booking-notes" className="block text-xs font-semibold text-brand-700 mb-1.5">Project details <span className="font-normal text-brand-400">(optional)</span></label>
                       <textarea
                         id="booking-notes" rows={3} placeholder="Tell them about your project…"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-brand-100 border border-brand-200/`10 focus:border-accent-400/60 focus:outline-none text-sm placeholder:text-brand-400 resize-none transition-colors"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-brand-100 border border-brand-200/10 focus:border-accent-400/60 focus:outline-none text-sm placeholder:text-brand-400 resize-none transition-colors"
                       />
                     </div>
                     <button

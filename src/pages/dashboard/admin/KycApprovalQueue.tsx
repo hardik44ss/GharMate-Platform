@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ShieldCheck, FileText, Check, X, MapPin, Award, Building2, Eye, Loader2 } from 'lucide-react';
+import { ShieldCheck, FileText, Check, X, MapPin, Award, Building2, Eye } from 'lucide-react';
 import { apiService } from '@/api/apiService';
 import DashboardHeader from '../DashboardHeader';
 import Card from '@/components/ui/Card';
@@ -28,12 +28,21 @@ export default function KycApprovalQueue() {
 
   const approveMutation = useMutation({
     mutationFn: (id: string) => apiService.approveKyc(id),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['kyc'] }); toast.success('KYC approved'); setSelected(null); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['kyc'] });
+      toast.success('KYC approved', { description: 'The submission has moved to the Approved tab.' });
+      setSelected(null);
+    },
   });
 
   const rejectMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) => apiService.rejectKyc(id, reason),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['kyc'] }); toast.success('KYC rejected'); setRejectOpen(null); setRejectReason(''); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['kyc'] });
+      toast.success('KYC rejected', { description: 'The submission has moved to the Rejected tab.' });
+      setRejectOpen(null);
+      setRejectReason('');
+    },
   });
 
   const filtered = filter === 'ALL' ? submissions : submissions.filter((s) => s.status === filter);
@@ -83,7 +92,15 @@ export default function KycApprovalQueue() {
                     <Button size="sm" variant="ghost" onClick={() => setSelected(sub)}><Eye className="w-4 h-4" /> Review</Button>
                     {sub.status === 'PENDING' && (
                       <>
-                        <Button size="sm" onClick={() => approveMutation.mutate(sub.id)} loading={approveMutation.isPending} className="bg-green-600 hover:bg-green-700"><Check className="w-4 h-4" /> Approve</Button>
+                        <Button
+                          size="sm"
+                          onClick={() => approveMutation.mutate(sub.id)}
+                          loading={approveMutation.isPending && approveMutation.variables === sub.id}
+                          disabled={approveMutation.isPending || rejectMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Check className="w-4 h-4" /> Approve
+                        </Button>
                         <Button size="sm" variant="danger" onClick={() => setRejectOpen(sub)}><X className="w-4 h-4" /> Reject</Button>
                       </>
                     )}

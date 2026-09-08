@@ -27,6 +27,19 @@ function withFallback<T>(apiCall: () => Promise<T>, fallback: T): Promise<T> {
   return apiCall().catch(() => fallback);
 }
 
+/**
+ * Demo-mode KYC decisions. When no backend is reachable the bundled submissions
+ * are read-only, so decisions are recorded here and layered on top of them —
+ * without this an approved/rejected submission would stay in the pending list.
+ */
+const kycDecisions = new Map<string, Pick<KycSubmission, 'status' | 'rejectionReason'>>();
+
+const applyKycDecisions = (submissions: KycSubmission[]): KycSubmission[] =>
+  submissions.map((s) => {
+    const decision = kycDecisions.get(s.id);
+    return decision ? { ...s, ...decision } : s;
+  });
+
 export const apiService = {
   async login(email: string, password: string): Promise<{ token: string; user: AuthUser }> {
     const res = await api.post('/auth/login', { email, password });
@@ -37,7 +50,7 @@ export const apiService = {
     await delay(600);
     const presets: Record<AuthUser['role'], AuthUser> = {
       ROLE_CLIENT: { id: 'u-client-1', email: 'rahul@gharmate.in', fullName: 'Rahul Sharma', role: 'ROLE_CLIENT', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop' },
-      ROLE_CONTRACTOR: { id: 'u-conn-1', email: 'rajesh@aaravbuildworks.in', fullName: 'Rajesh Kumar', role: 'ROLE_CONTRACTOR', kycStatus: 'APPROVED', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0d1ef5d0d2fc?w=200&h=200&fit=crop' },
+      ROLE_CONTRACTOR: { id: 'u-conn-1', email: 'rajesh@aaravbuildworks.in', fullName: 'Rajesh Kumar', role: 'ROLE_CONTRACTOR', kycStatus: 'APPROVED', avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop' },
       ROLE_ADMIN: { id: 'u-admin-1', email: 'admin@gharmate.in', fullName: 'System Admin', role: 'ROLE_ADMIN', avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop' },
     };
     return presets[role];
@@ -100,14 +113,15 @@ export const apiService = {
     return withFallback(async () => {
       const res = await api.get('/kyc/admin/pending');
       return res.data?.kycSubmissions ?? [];
-    }, mockKycSubmissions);
+    }, applyKycDecisions(mockKycSubmissions));
   },
 
   async approveKyc(id: string): Promise<void> {
     try {
       await api.put(`/kyc/admin/${id}`, { status: 'VERIFIED' });
     } catch {
-      // Demo fallback: queue updates locally when a live backend is unreachable
+      // Demo fallback: record the decision locally when no backend is reachable
+      kycDecisions.set(id, { status: 'APPROVED', rejectionReason: undefined });
     }
   },
 
@@ -115,7 +129,8 @@ export const apiService = {
     try {
       await api.put(`/kyc/admin/${id}`, { status: 'REJECTED', reason });
     } catch {
-      // Demo fallback: queue updates locally when a live backend is unreachable
+      // Demo fallback: record the decision locally when no backend is reachable
+      kycDecisions.set(id, { status: 'REJECTED', rejectionReason: reason });
     }
   },
 
@@ -275,5 +290,38 @@ export const apiService = {
       .slice(0, 4);
 
     return matches;
+  },
+
+  async uploadProjectDocuments(files: File[]): Promise<{ uploaded: string[] }> {
+    const uploaded = files.map((f) => f.name);
+    return withFallback(async () => {
+      const form = new FormData();
+      files.forEach((file) => form.append('documents', file));
+      const res = await api.post('/projects/documents', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return res.data ?? { uploaded };
+    }, { uploaded });
+  },
+
+  async sendContractorEnquiry(input: {
+    contractorId: string;
+    message: string;
+    projectType: string;
+    budget: number;
+    timeline: string;
+    location: string;
+  }): Promise<{ enquiryId: string }> {
+    return withFallback(async () => {
+      const res = await api.post('/contractors/enquiries', input);
+      return res.data ?? { enquiryId: `enq-${Date.now()}` };
+    }, { enquiryId: `enq-${Date.now()}` });
+  },
+
+  async subscribeToNewsletter(email: string): Promise<{ email: string }> {
+    return withFallback(async () => {
+      const res = await api.post('/newsletter/subscribe', { email });
+      return res.data ?? { email };
+    }, { email });
   },
 };

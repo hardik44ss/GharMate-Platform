@@ -1,22 +1,36 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowRight, ShieldCheck, MapPin, Star, Loader2, Wand2 } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, MapPin, Send, Wand2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiService } from '@/api/apiService';
 import DashboardHeader from '../DashboardHeader';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
 import StarRating from '@/components/ui/StarRating';
+import Avatar from '@/components/ui/Avatar';
 import { allSpecializations, allLocations } from '@/api/mockData';
-import type { ContractorMatch } from '@/types';
+import type { ContractorMatch, RecommenderPrefill } from '@/types';
+
+const BUDGET_MIN = 10000;
+const BUDGET_MAX = 1000000;
+const clampBudget = (value: number) => Math.min(BUDGET_MAX, Math.max(BUDGET_MIN, Math.round(value)));
 
 export default function AIRecommender() {
-  const [step, setStep] = useState(0);
-  const [projectType, setProjectType] = useState('');
-  const [budget, setBudget] = useState(25000);
+  // The cost estimator can hand over a project type, location and budget
+  const prefill = (useLocation().state ?? null) as RecommenderPrefill | null;
+
+  const [step, setStep] = useState(prefill ? 2 : 0);
+  const [projectType, setProjectType] = useState(prefill?.projectType ?? '');
+  const [budget, setBudget] = useState(prefill ? clampBudget(prefill.budget) : 25000);
   const [timeline, setTimeline] = useState('1-3 months');
-  const [location, setLocation] = useState('Bengaluru, Karnataka');
+  const [location, setLocation] = useState(prefill?.location ?? 'Bengaluru, Karnataka');
   const [matches, setMatches] = useState<ContractorMatch[] | null>(null);
+  const [contactTarget, setContactTarget] = useState<ContractorMatch | null>(null);
+  const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
 
   const { isFetching, refetch } = useQuery({
     queryKey: ['contractor-matches', projectType, budget, timeline, location],
@@ -29,6 +43,41 @@ export default function AIRecommender() {
     if (res.data) {
       setMatches(res.data);
       setStep(3);
+    }
+  };
+
+  const openContact = (match: ContractorMatch) => {
+    setContactTarget(match);
+    setMessage(
+      `Hi ${match.contractor.ownerName}, I am planning a ${projectType || 'construction'} project in ${location} `
+      + `with a budget of around ₹${budget.toLocaleString('en-IN')} and a timeline of ${timeline}. `
+      + `Could you share your availability and an indicative quote?`
+    );
+  };
+
+  const closeContact = () => {
+    setContactTarget(null);
+    setMessage('');
+  };
+
+  const sendEnquiry = async () => {
+    if (!contactTarget || !message.trim()) return;
+    setSending(true);
+    try {
+      await apiService.sendContractorEnquiry({
+        contractorId: contactTarget.contractor.id,
+        message: message.trim(),
+        projectType,
+        budget,
+        timeline,
+        location,
+      });
+      toast.success('Enquiry sent', { description: `${contactTarget.contractor.businessName} will get back to you shortly.` });
+      closeContact();
+    } catch {
+      toast.error('Could not send the enquiry. Please try again.');
+    } finally {
+      setSending(false);
     }
   };
 
@@ -82,7 +131,7 @@ export default function AIRecommender() {
                 <p className="text-sm text-slate-500 mb-6">This helps us match you with contractors who fit your budget.</p>
                 <div className="text-center py-8">
                   <p className="text-4xl font-bold text-brand-600 font-display">₹{budget.toLocaleString('en-IN')}</p>
-                  <input type="range" min="10000" max="1000000" step="5000" value={budget} onChange={(e) => setBudget(Number(e.target.value))} className="w-full mt-6 accent-brand-600" />
+                  <input type="range" min={BUDGET_MIN} max={BUDGET_MAX} step="5000" value={budget} onChange={(e) => setBudget(Number(e.target.value))} className="w-full mt-6 accent-brand-600" />
                   <div className="flex justify-between text-xs text-slate-400 mt-1"><span>₹10,000</span><span>₹10,00,000+</span></div>
                 </div>
                 <div className="flex justify-between mt-6">
@@ -98,6 +147,15 @@ export default function AIRecommender() {
               <Card className="p-8">
                 <h3 className="text-lg font-bold text-slate-900 mb-2">Location & Timeline</h3>
                 <p className="text-sm text-slate-500 mb-6">Where is the project and when do you need it done?</p>
+                {prefill && (
+                  <div className="flex items-start gap-2 p-3 mb-5 bg-brand-50 border border-brand-100 rounded-xl">
+                    <Sparkles className="w-4 h-4 text-accent-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-brand-700">
+                      Carried over from your cost estimate: <strong>{projectType}</strong> at a budget of{' '}
+                      <strong>₹{budget.toLocaleString('en-IN')}</strong>. Pick a timeline to see your matches.
+                    </p>
+                  </div>
+                )}
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Project Location</label>
@@ -136,9 +194,16 @@ export default function AIRecommender() {
                   <motion.div key={m.contractor.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
                     <Card hover className="p-5">
                       <div className="flex items-start gap-4">
-                        <div className="relative shrink-0">
-                          <img src={m.contractor.avatarUrl} alt={m.contractor.businessName} className="w-14 h-14 rounded-xl object-cover" />
-                          <div className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-accent-500 text-white text-xs font-bold rounded-full">{m.matchScore}% Match</div>
+                        <div className="shrink-0 flex flex-col items-center gap-1.5 w-16">
+                          <Avatar
+                            src={m.contractor.avatarUrl}
+                            name={m.contractor.ownerName}
+                            alt={m.contractor.businessName}
+                            className="w-14 h-14 shrink-0 rounded-xl object-cover text-base"
+                          />
+                          <span className="px-1.5 py-0.5 bg-accent-500 text-white text-[10px] font-bold rounded-full whitespace-nowrap">
+                            {m.matchScore}% Match
+                          </span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
@@ -152,7 +217,7 @@ export default function AIRecommender() {
                             <span>{m.contractor.projectsCompleted} completed projects</span>
                           </div>
                           <div className="mt-3">
-                            <p className="text-xs font-semibold text-slate-700 mb-2">Why GharMate recommends him</p>
+                            <p className="text-xs font-semibold text-slate-700 mb-2">Why GharMate recommends them</p>
                             <div className="flex flex-wrap gap-1.5">
                               {m.matchReasons.map((r) => (
                                 <span key={r} className="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-md font-medium flex items-center gap-1">
@@ -162,7 +227,7 @@ export default function AIRecommender() {
                             </div>
                           </div>
                         </div>
-                        <Button size="sm" className="shrink-0">Contact</Button>
+                        <Button size="sm" className="shrink-0" onClick={() => openContact(m)}>Contact</Button>
                       </div>
                     </Card>
                   </motion.div>
@@ -175,6 +240,52 @@ export default function AIRecommender() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Contact enquiry */}
+      <Modal
+        open={contactTarget !== null}
+        onClose={closeContact}
+        title={contactTarget ? `Contact ${contactTarget.contractor.businessName}` : 'Contact contractor'}
+        subtitle="Send your project brief and the contractor will respond with availability and a quote."
+        size="md"
+        footer={
+          <>
+            <Button variant="ghost" onClick={closeContact}>Cancel</Button>
+            <Button onClick={sendEnquiry} loading={sending} disabled={sending || !message.trim()}>
+              <Send className="w-4 h-4" /> {sending ? 'Sending…' : 'Send Enquiry'}
+            </Button>
+          </>
+        }
+      >
+        {contactTarget && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+              <Avatar
+                src={contactTarget.contractor.avatarUrl}
+                name={contactTarget.contractor.ownerName}
+                className="w-11 h-11 shrink-0 rounded-lg object-cover text-sm"
+              />
+              <div className="min-w-0">
+                <p className="font-semibold text-slate-900 truncate">{contactTarget.contractor.businessName}</p>
+                <p className="text-xs text-slate-500 flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> {contactTarget.contractor.location} · {contactTarget.matchScore}% match
+                </p>
+              </div>
+            </div>
+            <div>
+              <label htmlFor="enquiry-message" className="block text-sm font-semibold text-slate-700 mb-1.5">Your message</label>
+              <textarea
+                id="enquiry-message"
+                rows={6}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 resize-y"
+              />
+              <p className="text-xs text-slate-400 mt-1.5">Your project type, budget and timeline are shared along with this message.</p>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
