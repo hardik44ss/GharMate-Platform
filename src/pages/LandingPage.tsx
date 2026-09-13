@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   Search, ShieldCheck, Calculator, Sparkles, Star, ArrowRight,
   Hammer, Wrench, Home, FileCheck, Users, TrendingUp, Quote,
-  Mail, CheckCircle, Lock, Zap,
+    Mail, CheckCircle, Lock, Zap, ChevronDown,
 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Button from '@/components/ui/Button';
@@ -82,8 +82,12 @@ export default function LandingPage() {
     return `Labour from ₹${rate.toLocaleString('en-IN')}/day`;
   };
 
-  const handleSearch = () => {
+    const handleSearch = () => {
     navigate(`/contractors${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`);
+  };
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
@@ -125,13 +129,29 @@ export default function LandingPage() {
             Connect with verified contractors, estimate construction costs with AI, track labour and project milestones, and manage your entire construction project in one place.
           </motion.p>
 
-          {/* Search Bar */}
+                    {/* Primary CTA — the single, clear starting point for first-time visitors */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
+            className="mt-8 flex flex-col items-center gap-3"
+          >
+            <Button size="lg" onClick={() => setAuthOpen(true)} className="px-8 py-4 text-base shadow-soft">
+              Get Started <ArrowRight className="w-5 h-5" />
+            </Button>
+            <p className="text-sm text-brand-500">
+              Free to start. Pick a workspace, get an AI cost estimate, or browse contractors.
+            </p>
+          </motion.div>
+
+          {/* Secondary quick search (demoted — not the primary action) */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
             className="mt-10 max-w-2xl mx-auto"
           >
+            <p className="text-xs font-medium text-brand-500 mb-2">Prefer to browse first?</p>
             <div className="flex items-center gap-2 p-2 bg-white rounded-2xl border border-brand-200 shadow-float">
               <div className="flex items-center gap-2 flex-1 px-3">
                 <Search className="w-5 h-5 text-brand-400 shrink-0" />
@@ -144,8 +164,8 @@ export default function LandingPage() {
                   className="w-full py-3 text-sm text-brand-800 placeholder-brand-400 outline-none bg-transparent"
                 />
               </div>
-              <Button size="lg" onClick={handleSearch} className="shrink-0">
-                Find Contractors <ArrowRight className="w-4 h-4" />
+              <Button size="lg" variant="outline" onClick={handleSearch} className="shrink-0">
+                <Search className="w-4 h-4" /> Find Contractors
               </Button>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
@@ -160,6 +180,27 @@ export default function LandingPage() {
                 </button>
               ))}
             </div>
+          </motion.div>
+
+          {/* Scroll cue — make it obvious there is more content below the fold */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-1.5 text-brand-400"
+          >
+            <a
+              href="#portals"
+              aria-label="Scroll to explore the platform"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollTo('portals');
+              }}
+              className="flex flex-col items-center gap-1.5 hover:text-brand-600"
+            >
+                            <ChevronDown className="w-6 h-6 animate-bounce" aria-hidden="true" />
+              <span className="text-xs font-medium">Scroll to explore</span>
+            </a>
           </motion.div>
         </div>
       </section>
@@ -194,7 +235,7 @@ export default function LandingPage() {
       </section>
 
       {/* Role Portals */}
-      <section id="portals" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+            <section id="portals" className="py-20 px-4 sm:px-6 lg:px-8 bg-white scroll-mt-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-4">
             <p className="text-[11px] font-semibold tracking-[0.24em] uppercase text-accent-600">One platform, three experiences</p>
@@ -226,14 +267,24 @@ export default function LandingPage() {
                       </li>
                     ))}
                   </ul>
-                  <Button
+                                    <Button
                     onClick={() => handlePortalEnter(portal)}
                     disabled={loggingIn !== null}
+                    variant="outline"
                     className="w-full"
+                    aria-label={`Enter the ${portal.title} — ${portal.desc}`}
+                    title={`Enter as ${portal.title.split(' ')[0]}: ${portal.desc}`}
                   >
                     {loggingIn === portal.role ? 'Signing you in…' : isAuthenticated && user?.role === portal.role ? 'Open Dashboard' : `Enter as ${portal.title.split(' ')[0]}`}
                     <ArrowRight className="w-4 h-4" />
                   </Button>
+                  <p className="mt-3 text-xs text-brand-500">
+                    {portal.role === 'ROLE_CLIENT'
+                      ? 'Plan projects, get AI estimates, hire verified pros.'
+                      : portal.role === 'ROLE_CONTRACTOR'
+                        ? 'Showcase work, bid on projects, manage site progress.'
+                        : 'Verify contractors, manage users, monitor platform metrics.'}
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -242,7 +293,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
+            <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50 scroll-mt-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 font-display">How GharMate Works</h2>
@@ -279,7 +330,7 @@ export default function LandingPage() {
       </section>
 
       {/* AI Tools Preview */}
-      <section id="ai-tools" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+            <section id="ai-tools" className="py-20 px-4 sm:px-6 lg:px-8 bg-white scroll-mt-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent-50 rounded-full mb-3">

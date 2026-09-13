@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Hammer, Menu, X, ChevronDown, LayoutDashboard, LogOut } from 'lucide-react';
@@ -32,12 +32,21 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
     navigate('/');
   };
 
-  const navLinks = [
+    const navLinks = [
     { label: 'Find Contractors', href: '/contractors' },
-    { label: 'Workspaces', href: '/#portals' },
-    { label: 'How It Works', href: '/#how-it-works' },
-    { label: 'AI Tools', href: '/#ai-tools' },
+    { label: 'Workspaces', href: '#portals' },
+    { label: 'How It Works', href: '#how-it-works' },
+    { label: 'AI Tools', href: '#ai-tools' },
   ];
+
+  // Smooth-scroll to in-page anchors (no full reload) and close the mobile menu.
+  const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      document.getElementById(href.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    setMobileOpen(false);
+  };
 
   return (
     <motion.nav
@@ -59,17 +68,19 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
+                {/* Desktop navigation */}
+      <div className="hidden md:flex items-center gap-1">
+        {navLinks.map((link) => (
+          <a
+            key={link.label}
+            href={link.href}
+                        onClick={(e) => handleNavClick(e, link.href)}
+            className="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+          >
+            {link.label}
+          </a>
+        ))}
+      </div>
 
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated && user ? (
@@ -118,7 +129,12 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
             )}
           </div>
 
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-slate-700">
+                    <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
+            className="md:hidden p-2 text-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-300"
+          >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
@@ -130,7 +146,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
             className="md:hidden mt-4 pb-4 space-y-1 bg-white rounded-2xl p-4 shadow-float"
           >
             {navLinks.map((link) => (
-              <a key={link.label} href={link.href} onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg">
+                            <a key={link.label} href={link.href} onClick={(e) => handleNavClick(e, link.href)} className="block px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg">
                 {link.label}
               </a>
             ))}
